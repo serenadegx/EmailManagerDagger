@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:hint=""
+    app:counterEnabled="true"
+    app:counterMaxLength="100"
+    app:hintEnabled="false">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_edit_text"
+        android:gravity="left"
+        android:hint="请输入签名"
+        android:maxLength="100"
+        android:padding="12dp"
+        android:text=""
+        android:textColor="@android:color/black" />
+</com.google.android.material.textfield.TextInputLayout>
