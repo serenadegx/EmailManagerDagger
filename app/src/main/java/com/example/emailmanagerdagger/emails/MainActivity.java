@@ -1,5 +1,7 @@
 package com.example.emailmanagerdagger.emails;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.emailmanagerdagger.R;
@@ -103,5 +105,9 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public static void start2MainActivity(Context context) {
+        context.startActivity(new Intent(context, MainActivity.class));
     }
 }

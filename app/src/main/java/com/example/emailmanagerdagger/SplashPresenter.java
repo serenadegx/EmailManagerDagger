@@ -24,7 +24,17 @@ public class SplashPresenter implements SplashContract.Presenter {
 
     @Override
     public void config(List<Configuration> data) {
-        mAccountRepository.config(data);
+        mAccountRepository.config(data, new AccountDataSource.CallBack() {
+            @Override
+            public void onSuccess() {
+                getCurAccount();
+            }
+
+            @Override
+            public void onError(String msg) {
+
+            }
+        });
     }
 
     @Override

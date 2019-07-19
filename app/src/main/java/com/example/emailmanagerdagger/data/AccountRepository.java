@@ -54,7 +54,7 @@ public class AccountRepository implements AccountDataSource {
         mAccountLocalDataSource.setCurAccount(account);
     }
 
-    public void config(List<Configuration> data) {
-        mAccountLocalDataSource.config(data);
+    public void config(List<Configuration> data,CallBack callBack) {
+        mAccountLocalDataSource.config(data,callBack);
     }
 }

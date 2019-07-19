@@ -1,5 +1,6 @@
 package com.example.emailmanagerdagger.data.local;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.example.emailmanagerdagger.data.Account;
@@ -130,6 +131,7 @@ public class AccountLocalDataSource implements AccountDataSource {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                SystemClock.sleep(500);
                 QueryBuilder<Account> qb = mAccountDao.queryBuilder().where(AccountDao.Properties.IsCur.eq("true"));
                 final List<Account> data = qb.list();
                 mAppExecutors.getMainThread().execute(new Runnable() {
@@ -147,13 +149,14 @@ public class AccountLocalDataSource implements AccountDataSource {
         mAppExecutors.getDiskIO().execute(runnable);
     }
 
-    public void config(final List<Configuration> data) {
+    public void config(final List<Configuration> data, final CallBack callBack) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 List<Configuration> configurations = mConfigurationDao.loadAll();
                 if (!configurations.isEmpty())
                     mConfigurationDao.insertInTx(data);
+                callBack.onSuccess();
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);
