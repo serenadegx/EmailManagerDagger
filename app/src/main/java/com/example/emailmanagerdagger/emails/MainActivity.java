@@ -1,7 +1,8 @@
-package com.example.emailmanagerdagger;
+package com.example.emailmanagerdagger.emails;
 
 import android.os.Bundle;
 
+import com.example.emailmanagerdagger.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 

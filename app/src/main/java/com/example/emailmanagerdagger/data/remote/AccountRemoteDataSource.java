@@ -6,6 +6,8 @@ import com.example.emailmanagerdagger.utils.AppExecutors;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.mail.Authenticator;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
@@ -13,9 +15,11 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 
+@Singleton
 public class AccountRemoteDataSource implements AccountDataSource {
     private final AppExecutors mAppExecutors;
 
+    @Inject
     public AccountRemoteDataSource(AppExecutors executors) {
         mAppExecutors = executors;
     }

@@ -16,4 +16,45 @@
     <string name="menu_send">Send</string>
     <string name="bt_download">下载</string>
     <string name="bt_open">打开</string>
+
+    <!--qq邮箱配置-->
+    <string-array name="qq_email">
+        <item>qq邮箱</item>
+        <item>imap</item>
+        <item>mail.imap.host</item>
+        <item>imap.qq.com</item>
+        <item>mail.imap.port</item>
+        <item>993</item>
+        <item>mail.imap.ssl.enable</item>
+        <item>1</item>
+        <item>smtp</item>
+        <item>mail.smtp.host</item>
+        <item>smtp.qq.com</item>
+        <item>mail.smtp.port</item>
+        <item>465</item>
+        <item>mail.smtp.ssl.enable</item>
+        <item>1</item>
+        <item>mail.smtp.auth</item>
+        <item>1</item>
+    </string-array>
+    <!--腾讯企业邮箱配置-->
+    <string-array name="qq_exmail">
+        <item>腾讯企业邮箱</item>
+        <item>imap</item>
+        <item>mail.imap.host</item>
+        <item>imap.exmail.qq.com</item>
+        <item>mail.imap.port</item>
+        <item>993</item>
+        <item>mail.imap.ssl.enable</item>
+        <item>1</item>
+        <item>smtp</item>
+        <item>mail.smtp.host</item>
+        <item>smtp.exmail.qq.com</item>
+        <item>mail.smtp.port</item>
+        <item>465</item>
+        <item>mail.smtp.ssl.enable</item>
+        <item>1</item>
+        <item>mail.smtp.auth</item>
+        <item>1</item>
+    </string-array>
 </resources>

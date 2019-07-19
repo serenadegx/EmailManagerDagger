@@ -1,5 +1,7 @@
 package com.example.emailmanagerdagger.data;
 
+import android.util.Log;
+
 import com.example.emailmanagerdagger.data.local.AccountLocalDataSource;
 import com.example.emailmanagerdagger.data.remote.AccountRemoteDataSource;
 
@@ -18,6 +20,7 @@ public class AccountRepository implements AccountDataSource {
                              @Local AccountLocalDataSource mAccountLocalDataSource) {
         this.mAccountRemoteDataSource = mAccountRemoteDataSource;
         this.mAccountLocalDataSource = mAccountLocalDataSource;
+        Log.i("mango", "AccountLocalDataSource:" + mAccountLocalDataSource);
     }
 
     @Override

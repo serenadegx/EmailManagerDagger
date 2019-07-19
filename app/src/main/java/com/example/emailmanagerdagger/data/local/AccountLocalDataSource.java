@@ -1,5 +1,7 @@
 package com.example.emailmanagerdagger.data.local;
 
+import android.util.Log;
+
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.AccountDao;
 import com.example.emailmanagerdagger.data.AccountDataSource;
@@ -11,6 +13,10 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class AccountLocalDataSource implements AccountDataSource {
 
     private final AppExecutors mAppExecutors;
@@ -18,10 +24,12 @@ public class AccountLocalDataSource implements AccountDataSource {
     private final AccountDao mAccountDao;
     private final ConfigurationDao mConfigurationDao;
 
+    @Inject
     public AccountLocalDataSource(AppExecutors mAppExecutors, AccountDao accountDao, ConfigurationDao configurationDao) {
         this.mAppExecutors = mAppExecutors;
         this.mAccountDao = accountDao;
         this.mConfigurationDao = configurationDao;
+        Log.i("mango", "ConfigurationDao:" + mConfigurationDao);
     }
 
     @Override
