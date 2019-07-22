@@ -1,7 +1,7 @@
-package com.example.emailmanagerdagger.data.remote;
+package com.example.emailmanagerdagger.data.source.remote;
 
 import com.example.emailmanagerdagger.data.Account;
-import com.example.emailmanagerdagger.data.AccountDataSource;
+import com.example.emailmanagerdagger.data.source.AccountDataSource;
 import com.example.emailmanagerdagger.utils.AppExecutors;
 
 import java.util.Properties;

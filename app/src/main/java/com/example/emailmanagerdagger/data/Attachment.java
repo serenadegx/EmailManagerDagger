@@ -11,7 +11,14 @@ public class Attachment implements Parcelable {
     private boolean isDownload;
     private boolean enable;
 
-    protected Attachment(Parcel in) {
+    public Attachment(String fileName, String path, String size, long total) {
+        this.fileName = fileName;
+        this.path = path;
+        this.size = size;
+        this.total = total;
+    }
+
+    public Attachment(Parcel in) {
         fileName = in.readString();
         path = in.readString();
         size = in.readString();

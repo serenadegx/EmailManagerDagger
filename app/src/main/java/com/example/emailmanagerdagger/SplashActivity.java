@@ -6,7 +6,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.example.emailmanagerdagger.account.EmailCategoryActivity;
-import com.example.emailmanagerdagger.data.AccountRepository;
 import com.example.emailmanagerdagger.data.Configuration;
 import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.emails.MainActivity;
@@ -94,11 +93,13 @@ public class SplashActivity extends DaggerAppCompatActivity implements SplashCon
     @Override
     public void jump2Main() {
         MainActivity.start2MainActivity(this);
+        finish();
     }
 
     @Override
     public void jump2AddAccount() {
         EmailCategoryActivity.start2EmailCategoryActivity(this);
+        finish();
     }
 
     @Override

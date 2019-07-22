@@ -8,12 +8,17 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.example.emailmanagerdagger.R;
 
 import dagger.android.support.DaggerFragment;
 
 public class DraftsFragment extends DaggerFragment {
+    public static Fragment newInstance() {
+        return new DraftsFragment();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

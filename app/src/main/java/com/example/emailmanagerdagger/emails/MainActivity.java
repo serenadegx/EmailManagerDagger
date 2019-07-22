@@ -4,7 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.emails.drafts.DraftsFragment;
+import com.example.emailmanagerdagger.emails.inbox.InboxFragment;
+import com.example.emailmanagerdagger.emails.sent.SentFragment;
+import com.example.emailmanagerdagger.settings.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -21,8 +26,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.Menu;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -43,6 +52,8 @@ public class MainActivity extends AppCompatActivity
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView) headerView.findViewById(R.id.textView)).setText(EmailApplication.getAccount().getAccount());
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -88,17 +99,15 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_tools) {
-
-        } else if (id == R.id.nav_share) {
-
+        if (id == R.id.nav_inbox) {
+            replaceFragmentInActivity(InboxFragment.newInstance(), getSupportFragmentManager());
         } else if (id == R.id.nav_send) {
+            replaceFragmentInActivity(SentFragment.newInstance(), getSupportFragmentManager());
+        } else if (id == R.id.nav_drafts) {
+            replaceFragmentInActivity(DraftsFragment.newInstance(), getSupportFragmentManager());
+        } else if (id == R.id.nav_tools) {
+            SettingsActivity.startForResult2SettingsActivity(this);
+        } else if (id == R.id.nav_share) {
 
         }
 
@@ -107,7 +116,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void replaceFragmentInActivity(Fragment fragment, FragmentManager fragmentManager) {
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.commit();
+    }
+
     public static void start2MainActivity(Context context) {
-        context.startActivity(new Intent(context, MainActivity.class));
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }

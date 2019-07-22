@@ -1,4 +1,4 @@
-package com.example.emailmanagerdagger.data;
+package com.example.emailmanagerdagger.data.source;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -9,5 +9,5 @@ import javax.inject.Qualifier;
 @Qualifier
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Remote {
+public @interface Local {
 }

@@ -1,11 +1,11 @@
-package com.example.emailmanagerdagger.data.local;
+package com.example.emailmanagerdagger.data.source.local;
 
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.AccountDao;
-import com.example.emailmanagerdagger.data.AccountDataSource;
+import com.example.emailmanagerdagger.data.source.AccountDataSource;
 import com.example.emailmanagerdagger.data.Configuration;
 import com.example.emailmanagerdagger.data.ConfigurationDao;
 import com.example.emailmanagerdagger.utils.AppExecutors;
@@ -48,16 +48,21 @@ public class AccountLocalDataSource implements AccountDataSource {
                     mAccountDao.updateInTx(list);
                 }
                 final long id = mAccountDao.insert(account);
-                mAppExecutors.getMainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (id > -1) {
-                            callBack.onSuccess();
-                        } else {
-                            callBack.onError("保存账户失败");
-                        }
-                    }
-                });
+                if (id > -1) {
+                    callBack.onSuccess();
+                } else {
+                    callBack.onError("保存账户失败");
+                }
+//                mAppExecutors.getMainThread().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (id > -1) {
+//                            callBack.onSuccess();
+//                        } else {
+//                            callBack.onError("保存账户失败");
+//                        }
+//                    }
+//                });
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);
@@ -154,7 +159,7 @@ public class AccountLocalDataSource implements AccountDataSource {
             @Override
             public void run() {
                 List<Configuration> configurations = mConfigurationDao.loadAll();
-                if (!configurations.isEmpty())
+                if (configurations.isEmpty())
                     mConfigurationDao.insertInTx(data);
                 callBack.onSuccess();
             }

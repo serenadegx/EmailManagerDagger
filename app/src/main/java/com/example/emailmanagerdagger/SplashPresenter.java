@@ -3,8 +3,8 @@ package com.example.emailmanagerdagger;
 import android.util.Log;
 
 import com.example.emailmanagerdagger.data.Account;
-import com.example.emailmanagerdagger.data.AccountDataSource;
-import com.example.emailmanagerdagger.data.AccountRepository;
+import com.example.emailmanagerdagger.data.source.AccountDataSource;
+import com.example.emailmanagerdagger.data.source.AccountRepository;
 import com.example.emailmanagerdagger.data.Configuration;
 
 import java.util.List;
@@ -45,6 +45,7 @@ public class SplashPresenter implements SplashContract.Presenter {
                 if (mSplashView == null || !mSplashView.isActive()) {
                     return;
                 }
+                EmailApplication.setAccount(data);
                 mSplashView.jump2Main();
             }
 

@@ -1,10 +1,13 @@
 package com.example.emailmanagerdagger.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 @Entity
-public class Configuration {
+public class Configuration implements Parcelable {
     @Id
     private long categoryId;
     private String name;
@@ -58,6 +61,39 @@ public class Configuration {
     @Generated(hash = 365253574)
     public Configuration() {
     }
+
+    protected Configuration(Parcel in) {
+        categoryId = in.readLong();
+        name = in.readString();
+        receiveProtocol = in.readString();
+        receiveHostKey = in.readString();
+        receiveHostValue = in.readString();
+        receivePortKey = in.readString();
+        receivePortValue = in.readString();
+        receiveEncryptKey = in.readString();
+        receiveEncryptValue = in.readByte() != 0;
+        sendProtocol = in.readString();
+        sendHostKey = in.readString();
+        sendHostValue = in.readString();
+        sendPortKey = in.readString();
+        sendPortValue = in.readString();
+        sendEncryptKey = in.readString();
+        sendEncryptValue = in.readByte() != 0;
+        authKey = in.readString();
+        authValue = in.readByte() != 0;
+    }
+
+    public static final Creator<Configuration> CREATOR = new Creator<Configuration>() {
+        @Override
+        public Configuration createFromParcel(Parcel in) {
+            return new Configuration(in);
+        }
+
+        @Override
+        public Configuration[] newArray(int size) {
+            return new Configuration[size];
+        }
+    };
 
     public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
@@ -213,5 +249,32 @@ public class Configuration {
 
     public boolean getAuthValue() {
         return this.authValue;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(categoryId);
+        dest.writeString(name);
+        dest.writeString(receiveProtocol);
+        dest.writeString(receiveHostKey);
+        dest.writeString(receiveHostValue);
+        dest.writeString(receivePortKey);
+        dest.writeString(receivePortValue);
+        dest.writeString(receiveEncryptKey);
+        dest.writeByte((byte) (receiveEncryptValue ? 1 : 0));
+        dest.writeString(sendProtocol);
+        dest.writeString(sendHostKey);
+        dest.writeString(sendHostValue);
+        dest.writeString(sendPortKey);
+        dest.writeString(sendPortValue);
+        dest.writeString(sendEncryptKey);
+        dest.writeByte((byte) (sendEncryptValue ? 1 : 0));
+        dest.writeString(authKey);
+        dest.writeByte((byte) (authValue ? 1 : 0));
     }
 }

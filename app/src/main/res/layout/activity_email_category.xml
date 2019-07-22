@@ -10,6 +10,7 @@
         android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@mipmap/back"
@@ -24,5 +25,5 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        tools:listitem="@layout/item_email_catogory" />
+        tools:listitem="@layout/item_email_category" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

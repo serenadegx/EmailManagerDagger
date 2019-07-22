@@ -7,10 +7,10 @@ import com.example.emailmanagerdagger.data.AccountDao;
 import com.example.emailmanagerdagger.data.ConfigurationDao;
 import com.example.emailmanagerdagger.data.DaoMaster;
 import com.example.emailmanagerdagger.data.DaoSession;
-import com.example.emailmanagerdagger.data.Local;
-import com.example.emailmanagerdagger.data.Remote;
-import com.example.emailmanagerdagger.data.local.AccountLocalDataSource;
-import com.example.emailmanagerdagger.data.remote.AccountRemoteDataSource;
+import com.example.emailmanagerdagger.data.source.Local;
+import com.example.emailmanagerdagger.data.source.Remote;
+import com.example.emailmanagerdagger.data.source.local.AccountLocalDataSource;
+import com.example.emailmanagerdagger.data.source.remote.AccountRemoteDataSource;
 import com.example.emailmanagerdagger.utils.AppExecutors;
 import com.example.emailmanagerdagger.utils.DiskIOThreadExecutor;
 import com.example.emailmanagerdagger.utils.NetWorkIOThreadExecutor;
@@ -46,14 +46,22 @@ public abstract class AccountRepositoryModule {
 
     @Singleton
     @Provides
-    static AccountDao provideAccountDao(DaoSession ds){
-        return ds.getAccountDao();
+    static AccountDao provideAccountDao(Application application){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "email_manager.db");
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        return daoSession.getAccountDao();
     }
 
     @Singleton
     @Provides
-    static ConfigurationDao provideConfigurationDao(DaoSession ds){
-        return ds.getConfigurationDao();
+    static ConfigurationDao provideConfigurationDao(Application application){
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "email_manager.db");
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
+        return daoSession.getConfigurationDao();
     }
 
     @Singleton

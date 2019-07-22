@@ -5,11 +5,16 @@ import android.os.Looper;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class AppExecutors {
     private final Executor mDiskIO;
     private final Executor mNetWorkIO;
     private final Executor mMainThread;
 
+    @Inject
     public AppExecutors(Executor diskIO, Executor netWorkIO, Executor mainThread) {
         this.mDiskIO = diskIO;
         this.mNetWorkIO = netWorkIO;
@@ -28,8 +33,10 @@ public class AppExecutors {
         return mMainThread;
     }
 
-    public static class MainThreadExecutor implements Executor{
+    @Singleton
+    public static class MainThreadExecutor implements Executor {
         private Handler mainHandler = new Handler(Looper.getMainLooper());
+
         @Override
         public void execute(Runnable command) {
             mainHandler.post(command);

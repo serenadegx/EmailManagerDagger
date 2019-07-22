@@ -1,6 +1,7 @@
 package com.example.emailmanagerdagger;
 
-import com.example.emailmanagerdagger.data.AccountRepository;
+import com.example.emailmanagerdagger.data.Account;
+import com.example.emailmanagerdagger.data.source.AccountRepository;
 import com.example.emailmanagerdagger.di.DaggerAppComponent;
 
 import javax.inject.Inject;
@@ -9,6 +10,16 @@ import dagger.android.AndroidInjector;
 import dagger.android.DaggerApplication;
 
 public class EmailApplication extends DaggerApplication {
+
+    private static Account mAccount;
+
+    public static void setAccount(Account account) {
+        mAccount = account;
+    }
+
+    public static Account getAccount() {
+        return mAccount;
+    }
 
     @Inject
     AccountRepository mAccountRepository;

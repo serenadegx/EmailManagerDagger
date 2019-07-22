@@ -1,9 +1,9 @@
-package com.example.emailmanagerdagger.data;
+package com.example.emailmanagerdagger.data.source;
 
-import android.util.Log;
-
-import com.example.emailmanagerdagger.data.local.AccountLocalDataSource;
-import com.example.emailmanagerdagger.data.remote.AccountRemoteDataSource;
+import com.example.emailmanagerdagger.data.Account;
+import com.example.emailmanagerdagger.data.Configuration;
+import com.example.emailmanagerdagger.data.source.local.AccountLocalDataSource;
+import com.example.emailmanagerdagger.data.source.remote.AccountRemoteDataSource;
 
 import java.util.List;
 
@@ -20,7 +20,6 @@ public class AccountRepository implements AccountDataSource {
                              @Local AccountLocalDataSource mAccountLocalDataSource) {
         this.mAccountRemoteDataSource = mAccountRemoteDataSource;
         this.mAccountLocalDataSource = mAccountLocalDataSource;
-        Log.i("mango", "AccountLocalDataSource:" + mAccountLocalDataSource);
     }
 
     @Override
@@ -54,7 +53,11 @@ public class AccountRepository implements AccountDataSource {
         mAccountLocalDataSource.setCurAccount(account);
     }
 
-    public void config(List<Configuration> data,CallBack callBack) {
-        mAccountLocalDataSource.config(data,callBack);
+    public void config(List<Configuration> data, CallBack callBack) {
+        mAccountLocalDataSource.config(data, callBack);
+    }
+
+    public void getConfigs(ConfigsCallBack callBack) {
+        mAccountLocalDataSource.getConfigs(callBack);
     }
 }
