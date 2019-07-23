@@ -3,6 +3,18 @@ package com.example.emailmanagerdagger.emails;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
@@ -11,30 +23,21 @@ import com.example.emailmanagerdagger.emails.inbox.InboxFragment;
 import com.example.emailmanagerdagger.emails.sent.SentFragment;
 import com.example.emailmanagerdagger.settings.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.view.View;
+import javax.inject.Inject;
 
-import androidx.core.view.GravityCompat;
-import androidx.appcompat.app.ActionBarDrawerToggle;
+import dagger.android.support.DaggerAppCompatActivity;
 
-import android.view.MenuItem;
-
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.view.Menu;
-import android.widget.TextView;
-
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends DaggerAppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    @Inject
+    InboxFragment inboxFragment;
+    @Inject
+    SentFragment sentFragment;
+    @Inject
+    DraftsFragment draftsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        replaceInboxFragmentInActivity(getSupportFragmentManager());
     }
 
     @Override
@@ -100,11 +104,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_inbox) {
-            replaceFragmentInActivity(InboxFragment.newInstance(), getSupportFragmentManager());
+            replaceInboxFragmentInActivity(getSupportFragmentManager());
         } else if (id == R.id.nav_send) {
-            replaceFragmentInActivity(SentFragment.newInstance(), getSupportFragmentManager());
+            replaceSentFragmentInActivity(getSupportFragmentManager());
         } else if (id == R.id.nav_drafts) {
-            replaceFragmentInActivity(DraftsFragment.newInstance(), getSupportFragmentManager());
+            replaceDraftsFragmentInActivity(getSupportFragmentManager());
         } else if (id == R.id.nav_tools) {
             SettingsActivity.startForResult2SettingsActivity(this);
         } else if (id == R.id.nav_share) {
@@ -116,10 +120,41 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void replaceFragmentInActivity(Fragment fragment, FragmentManager fragmentManager) {
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.commit();
+    private void replaceInboxFragmentInActivity(FragmentManager fragmentManager) {
+        InboxFragment fragment = (InboxFragment) fragmentManager
+                .findFragmentById(R.id.container);
+
+        if (fragment == null) {
+            Log.i("mango", "InboxFragment:" + inboxFragment);
+            fragment = inboxFragment;
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.container, fragment);
+            transaction.commit();
+        }
+    }
+
+    private void replaceSentFragmentInActivity(FragmentManager fragmentManager) {
+        SentFragment fragment = (SentFragment) fragmentManager
+                .findFragmentById(R.id.container);
+
+        if (fragment == null) {
+            fragment = sentFragment;
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.container, fragment);
+            transaction.commit();
+        }
+    }
+
+    private void replaceDraftsFragmentInActivity(FragmentManager fragmentManager) {
+        DraftsFragment fragment = (DraftsFragment) fragmentManager
+                .findFragmentById(R.id.container);
+
+        if (fragment == null) {
+            fragment = draftsFragment;
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.container, fragment);
+            transaction.commit();
+        }
     }
 
     public static void start2MainActivity(Context context) {

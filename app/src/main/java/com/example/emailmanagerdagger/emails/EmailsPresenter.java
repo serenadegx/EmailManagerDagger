@@ -44,6 +44,12 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     }
 
     @Override
+    public void refresh() {
+        mEmailRepository.refresh();
+        mEmailRepository.getEmails(mAccount, params, this);
+    }
+
+    @Override
     public void takeView(EmailsContract.View view) {
         this.mView = view;
     }
@@ -51,12 +57,12 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
 
     @Override
     public void onEmailsLoaded(List<Email> emails) {
-        if (mView == null || !mView.isActive()){
+        if (mView == null || !mView.isActive()) {
             return;
         }
-        if (emails.isEmpty()){
+        if (emails.isEmpty()) {
             mView.showNoEmail();
-        }else {
+        } else {
             mView.showEmail(emails);
         }
     }
@@ -71,8 +77,5 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
         mView = null;
     }
 
-    public void refresh() {
-        mEmailRepository.refresh();
-        mEmailRepository.getEmails(mAccount, params, this);
-    }
+
 }

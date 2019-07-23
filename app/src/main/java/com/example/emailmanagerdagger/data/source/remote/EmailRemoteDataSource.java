@@ -54,7 +54,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                List<Email> data = new ArrayList<>();
+                final List<Email> data = new ArrayList<>();
                 Properties props = System.getProperties();
                 props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
                 props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
@@ -83,19 +83,42 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     Message[] messages = inbox.getMessages();
                     for (Message message : messages) {
                         Email emailDetail = new Email();
+                        emailDetail.setCategory(params.getCategory());
                         //仅支持imap
                         emailDetail.setRead(message.getFlags().contains(Flags.Flag.SEEN));
                         dumpPart(message, emailDetail);
                         data.add(emailDetail);
                     }
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onEmailsLoaded(data);
+                        }
+                    });
+
                 } catch (NoSuchProviderException e) {
-                    callBack.onDataNotAvailable();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                     e.printStackTrace();
                 } catch (MessagingException e) {
-                    callBack.onDataNotAvailable();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                     e.printStackTrace();
                 } catch (Exception e) {
-                    callBack.onDataNotAvailable();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                     e.printStackTrace();
                 } finally {
                     try {
@@ -107,7 +130,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
                         e.printStackTrace();
                     }
                 }
-                callBack.onEmailsLoaded(data);
+
             }
         };
         mAppExecutors.getNetWorkIO().execute(runnable);
@@ -118,7 +141,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Email data;
+                final Email data;
                 Properties props = System.getProperties();
                 props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
                 props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
@@ -150,15 +173,32 @@ public class EmailRemoteDataSource implements EmailDataSource {
                         message.setFlag(Flags.Flag.SEEN, true);
                     }
                     data = new Email();
+                    data.setCategory(params.getCategory());
                     data.setAttachments(new ArrayList<Attachment>());
                     dumpPart(message, data);
-                    callBack.onEmailLoaded(data);
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onEmailLoaded(data);
+                        }
+                    });
+
                 } catch (NoSuchProviderException e) {
                     e.printStackTrace();
-                    callBack.onDataNotAvailable();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
-                    callBack.onDataNotAvailable();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                 } finally {
                     try {
                         if (inbox != null)

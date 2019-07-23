@@ -11,10 +11,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.di.ActivityScoped;
+import com.example.emailmanagerdagger.emails.EmailsPresenter;
+
+import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
 
+@ActivityScoped
 public class SentFragment extends DaggerFragment {
+
+    @Inject
+    EmailsPresenter mPresenter;
+
+    @Inject
+    public SentFragment() {
+    }
+
     public static Fragment newInstance() {
         return new SentFragment();
     }

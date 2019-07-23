@@ -58,8 +58,8 @@ public class Email implements Parcelable, Comparable<Email> {
 
     @Generated(hash = 1678077930)
     public Email(Long id, int messageId, int category, boolean isRead,
-            String subject, String date, String from, String personal, String to,
-            String cc, String bcc, String content, boolean hasAttach) {
+                 String subject, String date, String from, String personal, String to,
+                 String cc, String bcc, String content, boolean hasAttach) {
         this.id = id;
         this.messageId = messageId;
         this.category = category;
@@ -213,7 +213,7 @@ public class Email implements Parcelable, Comparable<Email> {
 
     @Override
     public int compareTo(Email o) {
-        return o.getId().compareTo(this.getId());
+        return o.getMessageId() - this.getMessageId();
     }
 
 

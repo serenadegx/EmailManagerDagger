@@ -38,7 +38,7 @@ public class InboxListAdapter extends RecyclerView.Adapter<InboxListAdapter.Wrap
     @Override
     public void onBindViewHolder(@NonNull WrapperViewHolder holder, int position) {
         Email email = mData.get(position);
-        holder.v.setVisibility(email.isRead() ? View.INVISIBLE : View.VISIBLE);
+        holder.v.setVisibility(email.isRead() ? View.GONE : View.VISIBLE);
         holder.iv.setVisibility(email.isHasAttach() ? View.VISIBLE : View.INVISIBLE);
         holder.from.setText(TextUtils.isEmpty(email.getPersonal()) ? email.getFrom() : email.getPersonal());
         holder.subject.setText(email.getSubject());

@@ -24,6 +24,7 @@ import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     private RecyclerView rv;
     private LinearLayout mEmptyView;
     private SwipeRefreshLayout srl;
+    private InboxListAdapter listAdapter;
 
     InboxListAdapter.ItemListener mItemListener = new InboxListAdapter.ItemListener() {
         @Override
@@ -45,10 +47,10 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
 
         }
     };
-    private InboxListAdapter listAdapter;
 
-    public static Fragment newInstance() {
-        return new InboxFragment();
+    @Inject
+    public InboxFragment() {
+
     }
 
     @Nullable
@@ -79,17 +81,19 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     public void onStart() {
         super.onStart();
         srl.setRefreshing(true);
+        mPresenter.takeView(this);
         mPresenter.loadInbox(EmailApplication.getAccount());
     }
 
     @Override
     public boolean isActive() {
-        return isActive();
+        return isAdded();
     }
 
     @Override
     public void showEmail(List<Email> data) {
         srl.setRefreshing(false);
+        Collections.sort(data);
         listAdapter.setNewData(data);
         mEmptyView.setVisibility(View.INVISIBLE);
     }

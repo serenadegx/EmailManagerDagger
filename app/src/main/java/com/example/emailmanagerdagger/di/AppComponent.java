@@ -4,8 +4,6 @@ import android.app.Application;
 
 import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.data.source.AccountRepository;
-import com.example.emailmanagerdagger.data.source.EmailRepository;
-import com.example.emailmanagerdagger.utils.AppExecutors;
 
 import javax.inject.Singleton;
 
@@ -24,7 +22,10 @@ import dagger.android.support.AndroidSupportInjectionModule;
 @Singleton
 @Component(modules = {ActivityBindingModule.class,
         AccountRepositoryModule.class,
+        EmailRepositoryModule.class,
         ApplicationModule.class,
+        AppExecutorModule.class,
+        DaoSessionModule.class,
         AndroidSupportInjectionModule.class})
 public interface AppComponent extends AndroidInjector<EmailApplication> {
 

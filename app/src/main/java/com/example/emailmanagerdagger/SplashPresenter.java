@@ -19,7 +19,6 @@ public class SplashPresenter implements SplashContract.Presenter {
     @Inject
     public SplashPresenter(AccountRepository mAccountRepository) {
         this.mAccountRepository = mAccountRepository;
-        Log.i("mango", "AccountRepository:" + mAccountRepository);
     }
 
     @Override

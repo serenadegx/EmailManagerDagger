@@ -11,12 +11,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.emails.EmailsPresenter;
+
+import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
 
 public class DraftsFragment extends DaggerFragment {
-    public static Fragment newInstance() {
-        return new DraftsFragment();
+
+    @Inject
+    EmailsPresenter mPresenter;
+
+    @Inject
+    public DraftsFragment() {
     }
 
     @Nullable

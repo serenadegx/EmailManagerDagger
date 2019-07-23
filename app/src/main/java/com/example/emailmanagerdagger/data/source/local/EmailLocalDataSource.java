@@ -1,5 +1,7 @@
 package com.example.emailmanagerdagger.data.source.local;
 
+import android.util.Log;
+
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailDao;
@@ -24,6 +26,8 @@ public class EmailLocalDataSource implements EmailDataSource {
     public EmailLocalDataSource(EmailDao emailDao, AppExecutors appExecutors) {
         this.mEmailDao = emailDao;
         this.mAppExecutors = appExecutors;
+        Log.i("mango", "EmailDao:" + mEmailDao);
+        Log.i("mango", "AppExecutors:" + mAppExecutors);
     }
 
     @Override
@@ -36,7 +40,11 @@ public class EmailLocalDataSource implements EmailDataSource {
                 mAppExecutors.getMainThread().execute(new Runnable() {
                     @Override
                     public void run() {
-                        callBack.onEmailsLoaded(emails);
+                        if (emails.isEmpty()) {
+                            callBack.onDataNotAvailable();
+                        } else {
+                            callBack.onEmailsLoaded(emails);
+                        }
                     }
                 });
             }
@@ -101,7 +109,7 @@ public class EmailLocalDataSource implements EmailDataSource {
         });
     }
 
-    public void saveAll(final List<Email> emails){
+    public void saveAll(final List<Email> emails) {
         mAppExecutors.getDiskIO().execute(new Runnable() {
             @Override
             public void run() {

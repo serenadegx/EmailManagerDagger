@@ -25,5 +25,7 @@ public interface EmailsContract {
         void loadSent(Account data);
 
         void loadDrafts(Account data);
+
+        void refresh();
     }
 }
