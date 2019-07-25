@@ -40,5 +40,5 @@ public interface EmailDataSource {
 
     void getEmail(Account account, EmailParams params, GetEmailCallBack callBack);
 
-    void delete(Account account, Email email, CallBack callBack);
+    void delete(Account account, EmailParams params, CallBack callBack);
 }

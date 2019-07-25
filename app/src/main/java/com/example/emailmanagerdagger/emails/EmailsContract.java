@@ -4,6 +4,7 @@ import com.example.emailmanagerdagger.BasePresenter;
 import com.example.emailmanagerdagger.BaseView;
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.Email;
+import com.example.emailmanagerdagger.data.EmailParams;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public interface EmailsContract {
 
         void showLoadingEmailError(String msg);
 
+        void showEmailDetailUi(EmailParams params);
+
     }
 
     interface Presenter extends BasePresenter<View> {
@@ -27,5 +30,7 @@ public interface EmailsContract {
         void loadDrafts(Account data);
 
         void refresh();
+
+        void jumpEmailDetail(Email email);
     }
 }

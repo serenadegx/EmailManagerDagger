@@ -10,6 +10,9 @@ import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.EmailDataSource;
 import com.example.emailmanagerdagger.utils.AppExecutors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -214,8 +217,197 @@ public class EmailRemoteDataSource implements EmailDataSource {
         mAppExecutors.getNetWorkIO().execute(runnable);
     }
 
+    public void downloadAttachment(final Account account, final File file, final EmailParams params, final long total, final DownloadCallback callback) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                List<InputStream> data = new ArrayList<>();
+                Properties props = System.getProperties();
+                props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
+                props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
+                props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                account.getAccount(), account.getPwd());
+                    }
+                });
+//        session.setDebug(true);
+                Store store = null;
+                Folder inbox = null;
+                try {
+                    store = session.getStore(account.getConfig().getReceiveProtocol());
+                    store.connect();
+                    if (params.getCategory() == EmailParams.Category.INBOX) {
+                        inbox = store.getFolder("INBOX");
+                    } else if (params.getCategory() == EmailParams.Category.SENT) {
+                        inbox = store.getFolder("Sent Messages");
+                    } else {
+                        inbox = store.getFolder("Drafts");
+                    }
+                    inbox.open(Folder.READ_ONLY);
+                    Message message = inbox.getMessage((int) params.getId());
+                    download(message, data);
+                    if (data.size() >= params.getIndex() && data.size() > 0) {
+                        realDownload(file, params.getIndex(), total, data.get(params.getIndex()), callback);
+                    } else {
+                        callback.onError(params.getIndex());
+                    }
+                } catch (NoSuchProviderException e) {
+                    e.printStackTrace();
+                    callback.onError(params.getIndex());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    callback.onError(params.getIndex());
+                } finally {
+                    try {
+                        if (inbox != null)
+                            inbox.close();
+                        if (store != null)
+                            store.close();
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        mAppExecutors.getNetWorkIO().execute(runnable);
+
+    }
+
+    private void download(Part p, List<InputStream> data) {
+        try {
+            if (p.isMimeType("multipart/*")) {
+//            This is a Multipart
+                Multipart mp = (Multipart) p.getContent();
+                level++;
+                int count = mp.getCount();
+                for (int i = 0; i < count; i++)
+                    download(mp.getBodyPart(i), data);
+                level--;
+            } else if (p.isMimeType("message/rfc822")) {
+//            This is a Nested Message
+                level++;
+                download((Part) p.getContent(), data);
+                level--;
+            }
+            if (level != 0 && p instanceof MimeBodyPart &&
+                    !p.isMimeType("multipart/*")) {
+                String disp = p.getDisposition();
+                // many mailers don't include a Content-Disposition
+                if (disp != null && disp.equalsIgnoreCase(Part.ATTACHMENT)) {
+                    String filename = p.getFileName();
+                    if (filename != null) {
+                        //原生下载附件代码无进度监听
+                        data.add(p.getInputStream());
+//                        ((MimeBodyPart) p).saveFile(file);
+                    }
+                }
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void realDownload(File file, final int index, final long total, InputStream is, final DownloadCallback callback) {
+        FileOutputStream fos = null;
+        int len;
+        long sum = 0;
+        byte[] bys = new byte[1024 * 2];
+        try {
+            fos = new FileOutputStream(file);
+            while ((len = is.read(bys)) != -1) {
+                sum += len;
+                fos.write(bys, 0, len);
+                final long finalSum = sum;
+                mAppExecutors.getMainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onProgress(index, finalSum * 1.0f / total);
+                    }
+                });
+            }
+            fos.flush();
+            mAppExecutors.getMainThread().execute(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onFinish(index);
+                }
+            });
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            callback.onError(index);
+        } catch (IOException e) {
+            e.printStackTrace();
+            callback.onError(index);
+        } finally {
+            try {
+                if (fos != null)
+                    fos.close();
+                if (is != null)
+                    is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
-    public void delete(Account account, Email email, CallBack callBack) {
+    public void delete(final Account account, final EmailParams params, final CallBack callBack) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                Properties props = System.getProperties();
+                props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
+                props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
+                props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                account.getAccount(), account.getPwd());
+                    }
+                });
+//        session.setDebug(true);
+                Store store = null;
+                Folder inbox = null;
+                try {
+                    store = session.getStore(account.getConfig().getReceiveProtocol());
+                    store.connect();
+                    if (params.getCategory() == EmailParams.Category.INBOX) {
+                        inbox = store.getFolder("INBOX");
+                    } else if (params.getCategory() == EmailParams.Category.SENT) {
+                        inbox = store.getFolder("Sent Messages");
+                    } else {
+                        inbox = store.getFolder("Drafts");
+                    }
+                    inbox.open(Folder.READ_WRITE);
+                    Message message = inbox.getMessage((int) params.getId());
+                    message.setFlag(Flags.Flag.DELETED, true);
+                    callBack.onSuccess();
+                } catch (NoSuchProviderException e) {
+                    e.printStackTrace();
+                } catch (MessagingException e) {
+                    callBack.onError();
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (inbox != null)
+                            inbox.close();
+                        if (store != null)
+                            store.close();
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        mAppExecutors.getNetWorkIO().execute(runnable);
 
     }
 

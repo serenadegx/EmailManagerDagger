@@ -8,8 +8,9 @@ public class Attachment implements Parcelable {
     private String path;
     private String size;
     private long total;
+    private String progress;
     private boolean isDownload;
-    private boolean enable;
+    private boolean enable = true;
 
     public Attachment(String fileName, String path, String size, long total) {
         this.fileName = fileName;

@@ -17,6 +17,8 @@ import dagger.android.support.AndroidSupportInjectionModule;
  *
  * @Singleton 虽标识为单例，但还是要指定单例的范围。想要实现应用全局的单例，需要在Application中完成创建{@link EmailApplication}
  * {@link ApplicationModule}暴露Application
+ * {@link AppExecutorModule}暴露AppExecutor
+ * {@link DaoSessionModule}暴露DaoSession
  * {@link AndroidSupportInjectionModule}是Dagger Android中的一种Module，他帮助我们生成子Component
  */
 @Singleton

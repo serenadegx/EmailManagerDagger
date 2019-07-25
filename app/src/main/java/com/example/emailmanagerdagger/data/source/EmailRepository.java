@@ -6,6 +6,7 @@ import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.local.EmailLocalDataSource;
 import com.example.emailmanagerdagger.data.source.remote.EmailRemoteDataSource;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -46,12 +47,22 @@ public class EmailRepository implements EmailDataSource {
 
     @Override
     public void getEmail(Account account, EmailParams params, final GetEmailCallBack callBack) {
-        mLocalDataSource.getEmail(account, params, callBack);
+        mRemoteDataSource.getEmail(account, params, callBack);
     }
 
     @Override
-    public void delete(Account account, Email email, CallBack callBack) {
+    public void delete(final Account account, final EmailParams params, final CallBack callBack) {
+        mRemoteDataSource.delete(account, params, new CallBack() {
+            @Override
+            public void onSuccess() {
+                mLocalDataSource.delete(account, params, callBack);
+            }
 
+            @Override
+            public void onError() {
+                callBack.onError();
+            }
+        });
     }
 
     /**
@@ -59,6 +70,10 @@ public class EmailRepository implements EmailDataSource {
      */
     public void refresh() {
         isCache = false;
+    }
+
+    public void download(Account account, File file, EmailParams params, long total, DownloadCallback callback) {
+        mRemoteDataSource.downloadAttachment(account, file, params, total, callback);
     }
 
     private void getEmailsFromRemoteDataSource(Account account, final EmailParams params, final GetEmailsCallBack callBack) {

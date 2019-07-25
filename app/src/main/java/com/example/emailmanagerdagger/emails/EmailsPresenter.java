@@ -21,32 +21,45 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     @Inject
     public EmailsPresenter(EmailRepository mEmailRepository) {
         this.mEmailRepository = mEmailRepository;
+        params = new EmailParams();
     }
 
     @Override
     public void loadInbox(Account data) {
         this.mAccount = data;
-        params = new EmailParams();
         params.setCategory(EmailParams.Category.INBOX);
         mEmailRepository.getEmails(data, params, this);
     }
 
     @Override
     public void loadSent(Account data) {
-        params = new EmailParams();
+        this.mAccount = data;
         params.setCategory(EmailParams.Category.SENT);
+        mEmailRepository.getEmails(mAccount, params, this);
     }
 
     @Override
     public void loadDrafts(Account data) {
-        params = new EmailParams();
+        this.mAccount = data;
         params.setCategory(EmailParams.Category.DRAFTS);
+        mEmailRepository.getEmails(mAccount, params, this);
     }
 
     @Override
     public void refresh() {
         mEmailRepository.refresh();
         mEmailRepository.getEmails(mAccount, params, this);
+    }
+
+    @Override
+    public void jumpEmailDetail(Email email) {
+        if (mView == null || !mView.isActive()) {
+            return;
+        }
+        EmailParams params = new EmailParams();
+        params.setId(email.getMessageId());
+        params.setCategory(email.getCategory());
+        mView.showEmailDetailUi(params);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.emailmanagerdagger.data.source.local;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.example.emailmanagerdagger.data.Account;
@@ -35,6 +36,7 @@ public class EmailLocalDataSource implements EmailDataSource {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                SystemClock.sleep(500);
                 final List<Email> emails = mEmailDao.queryBuilder().where(EmailDao.Properties.Category
                         .eq(params.getCategory())).list();
                 mAppExecutors.getMainThread().execute(new Runnable() {
@@ -58,7 +60,7 @@ public class EmailLocalDataSource implements EmailDataSource {
             @Override
             public void run() {
                 QueryBuilder<Email> queryBuilder = mEmailDao.queryBuilder();
-                WhereCondition and = queryBuilder.and(EmailDao.Properties.Id.eq(params.getId()), EmailDao.Properties.Category.eq(params.getCategory()));
+                WhereCondition and = queryBuilder.and(EmailDao.Properties.MessageId.eq(params.getId()), EmailDao.Properties.Category.eq(params.getCategory()));
                 final List<Email> emails = queryBuilder.where(and).list();
                 mAppExecutors.getMainThread().execute(new Runnable() {
                     @Override
@@ -76,11 +78,14 @@ public class EmailLocalDataSource implements EmailDataSource {
     }
 
     @Override
-    public void delete(Account account, final Email email, final CallBack callBack) {
+    public void delete(Account account, final EmailParams params, final CallBack callBack) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                mEmailDao.delete(email);
+                QueryBuilder<Email> queryBuilder = mEmailDao.queryBuilder();
+                WhereCondition and = queryBuilder.and(EmailDao.Properties.MessageId.eq(params.getId()), EmailDao.Properties.Category.eq(params.getCategory()));
+                final List<Email> emails = queryBuilder.where(and).list();
+                mEmailDao.deleteInTx(emails);
                 callBack.onSuccess();
             }
         };

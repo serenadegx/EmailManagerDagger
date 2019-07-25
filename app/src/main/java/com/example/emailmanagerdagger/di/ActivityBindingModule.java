@@ -5,6 +5,8 @@ import com.example.emailmanagerdagger.SplashModule;
 import com.example.emailmanagerdagger.account.AccountModule;
 import com.example.emailmanagerdagger.account.EmailCategoryActivity;
 import com.example.emailmanagerdagger.account.VerifyActivity;
+import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
+import com.example.emailmanagerdagger.emaildetail.EmailModule;
 import com.example.emailmanagerdagger.emails.EmailsModule;
 import com.example.emailmanagerdagger.emails.MainActivity;
 
@@ -28,4 +30,8 @@ public abstract class ActivityBindingModule {
     @ActivityScoped
     @ContributesAndroidInjector(modules = EmailsModule.class)
     abstract MainActivity mainActivity();
+
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = EmailModule.class)
+    abstract EmailDetailActivity emailDetailActivity();
 }

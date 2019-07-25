@@ -121,11 +121,14 @@ public class MainActivity extends DaggerAppCompatActivity
     }
 
     private void replaceInboxFragmentInActivity(FragmentManager fragmentManager) {
-        InboxFragment fragment = (InboxFragment) fragmentManager
-                .findFragmentById(R.id.container);
+        InboxFragment fragment = null;
+        if (fragmentManager
+                .findFragmentById(R.id.container) instanceof InboxFragment) {
+            fragment = (InboxFragment) fragmentManager
+                    .findFragmentById(R.id.container);
+        }
 
         if (fragment == null) {
-            Log.i("mango", "InboxFragment:" + inboxFragment);
             fragment = inboxFragment;
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(R.id.container, fragment);
@@ -134,8 +137,12 @@ public class MainActivity extends DaggerAppCompatActivity
     }
 
     private void replaceSentFragmentInActivity(FragmentManager fragmentManager) {
-        SentFragment fragment = (SentFragment) fragmentManager
-                .findFragmentById(R.id.container);
+        SentFragment fragment = null;
+        if (fragmentManager
+                .findFragmentById(R.id.container) instanceof SentFragment) {
+            fragment = (SentFragment) fragmentManager
+                    .findFragmentById(R.id.container);
+        }
 
         if (fragment == null) {
             fragment = sentFragment;
@@ -146,8 +153,12 @@ public class MainActivity extends DaggerAppCompatActivity
     }
 
     private void replaceDraftsFragmentInActivity(FragmentManager fragmentManager) {
-        DraftsFragment fragment = (DraftsFragment) fragmentManager
-                .findFragmentById(R.id.container);
+        DraftsFragment fragment = null;
+        if (fragmentManager
+                .findFragmentById(R.id.container) instanceof DraftsFragment) {
+            fragment = (DraftsFragment) fragmentManager
+                    .findFragmentById(R.id.container);
+        }
 
         if (fragment == null) {
             fragment = draftsFragment;

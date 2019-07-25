@@ -1,6 +1,5 @@
-package com.example.emailmanagerdagger.emails.inbox;
+package com.example.emailmanagerdagger.emails.drafts;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +16,12 @@ import java.util.List;
 
 import static dagger.internal.Preconditions.checkNotNull;
 
-public class InboxListAdapter extends RecyclerView.Adapter<InboxListAdapter.WrapperViewHolder> {
+public class DraftsListAdapter extends RecyclerView.Adapter<DraftsListAdapter.WrapperViewHolder> {
 
     private final ItemListener mItemListener;
     private List<Email> mData;
 
-    public InboxListAdapter(ItemListener mItemListener, List<Email> mData) {
+    public DraftsListAdapter(ItemListener mItemListener, List<Email> mData) {
         this.mItemListener = mItemListener;
         this.mData = mData;
     }
@@ -30,15 +29,14 @@ public class InboxListAdapter extends RecyclerView.Adapter<InboxListAdapter.Wrap
     @NonNull
     @Override
     public WrapperViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new WrapperViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_email, parent, false));
+        return new WrapperViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_drafts, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final WrapperViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull WrapperViewHolder holder, int position) {
         final Email email = mData.get(position);
-        holder.v.setVisibility(email.isRead() ? View.GONE : View.VISIBLE);
         holder.iv.setVisibility(email.isHasAttach() ? View.VISIBLE : View.INVISIBLE);
-        holder.from.setText(TextUtils.isEmpty(email.getPersonal()) ? email.getFrom() : email.getPersonal());
+        holder.from.setText(email.getTo());
         holder.subject.setText(email.getSubject());
         holder.date.setText(email.getDate());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +64,6 @@ public class InboxListAdapter extends RecyclerView.Adapter<InboxListAdapter.Wrap
 
     class WrapperViewHolder extends RecyclerView.ViewHolder {
 
-        private final View v;
         private final TextView from;
         private final TextView subject;
         private final TextView date;
@@ -74,7 +71,6 @@ public class InboxListAdapter extends RecyclerView.Adapter<InboxListAdapter.Wrap
 
         public WrapperViewHolder(@NonNull View itemView) {
             super(itemView);
-            v = itemView.findViewById(R.id.v);
             from = itemView.findViewById(R.id.tv_from);
             iv = itemView.findViewById(R.id.iv);
             subject = itemView.findViewById(R.id.tv_subject);

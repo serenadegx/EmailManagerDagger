@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -17,7 +16,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
 import com.example.emailmanagerdagger.data.Email;
+import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.di.ActivityScoped;
+import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
 import com.example.multifile.ui.EMDecoration;
@@ -44,7 +45,7 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     InboxListAdapter.ItemListener mItemListener = new InboxListAdapter.ItemListener() {
         @Override
         public void onEmailItemClick(Email data) {
-
+            mPresenter.jumpEmailDetail(data);
         }
     };
 
@@ -70,11 +71,6 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setupListAdapter();
-    }
-
-    private void setupListAdapter() {
-        listAdapter = new InboxListAdapter(mItemListener, new ArrayList<Email>(0));
-        rv.setAdapter(listAdapter);
     }
 
     @Override
@@ -111,6 +107,11 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     }
 
     @Override
+    public void showEmailDetailUi(EmailParams params) {
+        EmailDetailActivity.start2EmailDetailActivity(getContext(), params);
+    }
+
+    @Override
     public void onRefresh() {
         mPresenter.refresh();
     }
@@ -119,5 +120,10 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     public void onDestroy() {
         super.onDestroy();
         mPresenter.dropView();
+    }
+
+    private void setupListAdapter() {
+        listAdapter = new InboxListAdapter(mItemListener, new ArrayList<Email>(0));
+        rv.setAdapter(listAdapter);
     }
 }

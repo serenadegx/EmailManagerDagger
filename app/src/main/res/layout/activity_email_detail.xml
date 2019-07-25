@@ -10,6 +10,7 @@
         android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@mipmap/back"
@@ -32,6 +33,7 @@
 
 
             <TextView
+                android:id="@+id/tv_receiver"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -41,6 +43,7 @@
                 android:textColor="@android:color/black" />
 
             <TextView
+                android:id="@+id/tv_cc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -50,6 +53,7 @@
                 android:textColor="@android:color/black" />
 
             <TextView
+                android:id="@+id/tv_bcc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -59,6 +63,7 @@
                 android:textColor="@android:color/black" />
 
             <TextView
+                android:id="@+id/tv_subject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -68,6 +73,7 @@
                 android:textColor="@android:color/black" />
 
             <TextView
+                android:id="@+id/tv_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
