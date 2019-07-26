@@ -4,6 +4,8 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.example.emailmanagerdagger.data.Account;
+import com.example.emailmanagerdagger.data.Attachment;
+import com.example.emailmanagerdagger.data.AttachmentDao;
 import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailDao;
 import com.example.emailmanagerdagger.data.EmailParams;
@@ -22,13 +24,13 @@ import javax.inject.Singleton;
 public class EmailLocalDataSource implements EmailDataSource {
     private final EmailDao mEmailDao;
     private final AppExecutors mAppExecutors;
+    private final AttachmentDao mAttachmentDao;
 
     @Inject
-    public EmailLocalDataSource(EmailDao emailDao, AppExecutors appExecutors) {
+    public EmailLocalDataSource(EmailDao emailDao, AttachmentDao attachmentDao, AppExecutors appExecutors) {
         this.mEmailDao = emailDao;
+        this.mAttachmentDao = attachmentDao;
         this.mAppExecutors = appExecutors;
-        Log.i("mango", "EmailDao:" + mEmailDao);
-        Log.i("mango", "AppExecutors:" + mAppExecutors);
     }
 
     @Override
@@ -118,7 +120,24 @@ public class EmailLocalDataSource implements EmailDataSource {
         mAppExecutors.getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
-                mEmailDao.insertInTx(emails);
+                for (int i = 0; i < emails.size(); i++) {
+                    Email email = emails.get(i);
+                    long id = mEmailDao.insert(email);
+                    Log.i("mango", "EMAIL._id:" + id);
+                    List<Attachment> attachments = email.getAttachments();
+                    for (int j = 0; j < attachments.size(); j++) {
+                        Attachment attachment = attachments.get(j);
+                        attachment.setAttachmentId(id);
+                        mAttachmentDao.insert(attachment);
+                    }
+                }
+//                for (Email email : emails) {
+//                    long id = mEmailDao.insert(email);
+//                    for (Attachment attachment : email.getAttachments()) {
+//                        attachment.setAttachmentId(id);
+//                        mAttachmentDao.insert(attachment);
+//                    }
+//                }
             }
         });
     }

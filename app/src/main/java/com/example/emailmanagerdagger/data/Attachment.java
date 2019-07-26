@@ -3,13 +3,24 @@ package com.example.emailmanagerdagger.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.NotNull;
+import org.greenrobot.greendao.annotation.Transient;
+import org.greenrobot.greendao.annotation.Generated;
+
+@Entity
 public class Attachment implements Parcelable {
+    @Id(autoincrement = true)
+    private Long id;
+    @NotNull
+    private long attachmentId;
     private String fileName;
     private String path;
     private String size;
     private long total;
-    private String progress;
     private boolean isDownload;
+    @Transient
     private boolean enable = true;
 
     public Attachment(String fileName, String path, String size, long total) {
@@ -26,6 +37,22 @@ public class Attachment implements Parcelable {
         total = in.readLong();
         isDownload = in.readByte() != 0;
         enable = in.readByte() != 0;
+    }
+
+    @Generated(hash = 819056581)
+    public Attachment(Long id, long attachmentId, String fileName, String path,
+            String size, long total, boolean isDownload) {
+        this.id = id;
+        this.attachmentId = attachmentId;
+        this.fileName = fileName;
+        this.path = path;
+        this.size = size;
+        this.total = total;
+        this.isDownload = isDownload;
+    }
+
+    @Generated(hash = 1924760169)
+    public Attachment() {
     }
 
     public static final Creator<Attachment> CREATOR = new Creator<Attachment>() {
@@ -64,6 +91,10 @@ public class Attachment implements Parcelable {
         this.enable = enable;
     }
 
+    public void setAttachmentId(long attachmentId) {
+        this.attachmentId = attachmentId;
+    }
+
     public String getFileName() {
         return fileName;
     }
@@ -88,6 +119,10 @@ public class Attachment implements Parcelable {
         return enable;
     }
 
+    public long getAttachmentId() {
+        return attachmentId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -101,5 +136,21 @@ public class Attachment implements Parcelable {
         dest.writeLong(total);
         dest.writeByte((byte) (isDownload ? 1 : 0));
         dest.writeByte((byte) (enable ? 1 : 0));
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public boolean getIsDownload() {
+        return this.isDownload;
+    }
+
+    public void setIsDownload(boolean isDownload) {
+        this.isDownload = isDownload;
     }
 }

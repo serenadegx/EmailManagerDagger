@@ -46,8 +46,18 @@ public class EmailRepository implements EmailDataSource {
     }
 
     @Override
-    public void getEmail(Account account, EmailParams params, final GetEmailCallBack callBack) {
-        mRemoteDataSource.getEmail(account, params, callBack);
+    public void getEmail(final Account account, final EmailParams params, final GetEmailCallBack callBack) {
+        mLocalDataSource.getEmail(account, params, new GetEmailCallBack() {
+            @Override
+            public void onEmailLoaded(Email email) {
+                callBack.onEmailLoaded(email);
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                mRemoteDataSource.getEmail(account, params, callBack);
+            }
+        });
     }
 
     @Override

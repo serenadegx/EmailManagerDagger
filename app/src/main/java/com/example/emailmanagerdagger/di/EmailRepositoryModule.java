@@ -1,5 +1,6 @@
 package com.example.emailmanagerdagger.di;
 
+import com.example.emailmanagerdagger.data.AttachmentDao;
 import com.example.emailmanagerdagger.data.DaoSession;
 import com.example.emailmanagerdagger.data.EmailDao;
 import com.example.emailmanagerdagger.data.source.Local;
@@ -30,6 +31,12 @@ public abstract class EmailRepositoryModule {
     @Provides
     static EmailDao provideEmailDao(DaoSession ds) {
         return ds.getEmailDao();
+    }
+
+    @Singleton
+    @Provides
+    static AttachmentDao provideAttachmentDao(DaoSession ds) {
+        return ds.getAttachmentDao();
     }
 
 //    @Singleton

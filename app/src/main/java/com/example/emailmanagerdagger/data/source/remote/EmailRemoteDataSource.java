@@ -85,6 +85,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     inbox.open(Folder.READ_ONLY);
                     Message[] messages = inbox.getMessages();
                     for (Message message : messages) {
+                        Log.i("mango", "messageId:" + message.getMessageNumber());
                         Email emailDetail = new Email();
                         emailDetail.setCategory(params.getCategory());
                         //仅支持imap
@@ -415,7 +416,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
         try {
             if (p instanceof Message) {
                 dumpEnvelope((Message) p, data);
-                Log.i("mango", ((Message) p).getMessageNumber() + "    MimeType:" + p.getContentType());
+//                Log.i("mango", ((Message) p).getMessageNumber() + "    MimeType:" + p.getContentType());
             }
             if (p.isMimeType("text/plain")) {
 //            This is plain text

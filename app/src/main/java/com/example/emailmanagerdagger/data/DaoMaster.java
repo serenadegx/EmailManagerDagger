@@ -24,6 +24,7 @@ public class DaoMaster extends AbstractDaoMaster {
         EmailDao.createTable(db, ifNotExists);
         ConfigurationDao.createTable(db, ifNotExists);
         AccountDao.createTable(db, ifNotExists);
+        AttachmentDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
@@ -31,6 +32,7 @@ public class DaoMaster extends AbstractDaoMaster {
         EmailDao.dropTable(db, ifExists);
         ConfigurationDao.dropTable(db, ifExists);
         AccountDao.dropTable(db, ifExists);
+        AttachmentDao.dropTable(db, ifExists);
     }
 
     /**
@@ -52,6 +54,7 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(EmailDao.class);
         registerDaoClass(ConfigurationDao.class);
         registerDaoClass(AccountDao.class);
+        registerDaoClass(AttachmentDao.class);
     }
 
     public DaoSession newSession() {

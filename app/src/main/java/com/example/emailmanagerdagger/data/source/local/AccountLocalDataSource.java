@@ -30,8 +30,6 @@ public class AccountLocalDataSource implements AccountDataSource {
         this.mAppExecutors = appExecutors;
         this.mAccountDao = accountDao;
         this.mConfigurationDao = configurationDao;
-        Log.i("mango", "AppExecutors:" + mAppExecutors);
-        Log.i("mango", "ConfigurationDao:" + mConfigurationDao);
     }
 
     @Override

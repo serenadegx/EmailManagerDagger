@@ -37,6 +37,8 @@ public class EmailDao extends AbstractDao<Email, Long> {
         public final static Property HasAttach = new Property(12, boolean.class, "hasAttach", false, "HAS_ATTACH");
     }
 
+    private DaoSession daoSession;
+
 
     public EmailDao(DaoConfig config) {
         super(config);
@@ -44,6 +46,7 @@ public class EmailDao extends AbstractDao<Email, Long> {
     
     public EmailDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -177,6 +180,12 @@ public class EmailDao extends AbstractDao<Email, Long> {
             stmt.bindString(12, content);
         }
         stmt.bindLong(13, entity.getHasAttach() ? 1L: 0L);
+    }
+
+    @Override
+    protected final void attachEntity(Email entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     @Override
