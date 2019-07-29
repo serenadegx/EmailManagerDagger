@@ -196,6 +196,11 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
     }
 
     @Override
+    public void downloadStart(int index) {
+        listAdapter.downloadStart(index);
+    }
+
+    @Override
     public void downloadProgress(int index, float percent) {
         listAdapter.updateProgress(index, percent);
     }

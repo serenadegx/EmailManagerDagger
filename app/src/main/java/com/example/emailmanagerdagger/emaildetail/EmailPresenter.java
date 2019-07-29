@@ -84,6 +84,7 @@ public class EmailPresenter implements EmailDetailContract.Presenter {
 
     @Override
     public void downloadAttachment(Account account, File file, EmailParams params, long total) {
+        mView.downloadStart(params.getIndex());
         mEmailRepository.download(account, file, params, total, new EmailDataSource.DownloadCallback() {
             @Override
             public void onProgress(int index, float percent) {

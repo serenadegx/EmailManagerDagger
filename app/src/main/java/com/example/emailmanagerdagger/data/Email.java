@@ -33,7 +33,7 @@ public class Email implements Parcelable, Comparable<Email> {
     private String append;
     private boolean hasAttach;
     @ToMany(referencedJoinProperty = "attachmentId")
-    public List<Attachment> attachments = new ArrayList<>();
+    public List<Attachment> attachments;
 
 
     protected Email(Parcel in) {

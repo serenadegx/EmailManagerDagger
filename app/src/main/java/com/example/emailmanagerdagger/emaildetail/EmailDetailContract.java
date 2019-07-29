@@ -26,6 +26,8 @@ public interface EmailDetailContract {
 
         void showReplyUi();
 
+        void downloadStart(int index);
+
         void downloadProgress(int index, float percent);
 
         void downloadFinish(int index);

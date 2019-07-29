@@ -128,7 +128,8 @@ public class EmailLocalDataSource implements EmailDataSource {
                     for (int j = 0; j < attachments.size(); j++) {
                         Attachment attachment = attachments.get(j);
                         attachment.setAttachmentId(id);
-                        mAttachmentDao.insert(attachment);
+                        long insert = mAttachmentDao.insert(attachment);
+                        Log.i("mango", "ATTACHMENT._id:" + insert);
                     }
                 }
 //                for (Email email : emails) {
