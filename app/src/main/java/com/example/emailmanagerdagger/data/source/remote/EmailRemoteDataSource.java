@@ -394,6 +394,83 @@ public class EmailRemoteDataSource implements EmailDataSource {
         reply(account, email, save2Sent, callBack);
     }
 
+    public void save2Drafts(final Account account, Email data, CallBack callBack) {
+        Properties props = System.getProperties();
+        props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
+        props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
+        props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        account.getAccount(), account.getPwd());
+            }
+        });
+        session.setDebug(true);
+        MimeMessage msg = new MimeMessage(session);
+        Folder drafts;
+        Store store = null;
+        try {
+            //打开草稿箱
+            store = session.getStore(account.getConfig().getReceiveProtocol());
+            store.connect();
+            drafts = store.getFolder("Drafts");
+
+            if (data.getFrom() != null) {
+                msg.setFrom(new InternetAddress(data.getFrom(), account.getPersonal()));
+            }
+            msg.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(data.getTo(), false));
+            if (data.getCc() != null)
+                //抄送人
+                msg.setRecipients(Message.RecipientType.CC,
+                        InternetAddress.parse(data.getCc(), false));
+            if (data.getBcc() != null)
+                //秘密抄送人
+                msg.setRecipients(Message.RecipientType.BCC,
+                        InternetAddress.parse(data.getBcc(), false));
+
+            msg.setSubject(data.getSubject());
+
+            MimeMultipart mp = new MimeMultipart();
+            MimeBodyPart mbp1 = new MimeBodyPart();
+            mbp1.setText(data.getContent());
+            mp.addBodyPart(mbp1);
+            if (data.getAttachments() != null && data.getAttachments().size() > 0) {
+                for (Attachment detail1 : data.getAttachments()) {
+                    MimeBodyPart mbp2 = new MimeBodyPart();
+                    mbp2.attachFile(detail1.getPath());
+                    mp.addBodyPart(mbp2);
+                }
+            }
+            msg.setContent(mp);
+            msg.setSentDate(new Date());
+
+            //保存到草稿箱
+            msg.saveChanges();
+            msg.setFlag(Flags.Flag.DRAFT, true);
+            MimeMessage[] draftMessages = {msg};
+            drafts.appendMessages(draftMessages);
+            callBack.onSuccess();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            callBack.onError();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+//                if (drafts!=null)
+//                    drafts.close();
+                if (store != null)
+                    store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public void delete(final Account account, final EmailParams params, final CallBack callBack) {
         Runnable runnable = new Runnable() {

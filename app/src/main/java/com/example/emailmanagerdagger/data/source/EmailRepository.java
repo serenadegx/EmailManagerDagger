@@ -75,6 +75,22 @@ public class EmailRepository implements EmailDataSource {
         });
     }
 
+    public void send(final Account account, Email email, boolean save2Sent, CallBack callBack) {
+        mRemoteDataSource.send(account, email, save2Sent, callBack);
+    }
+
+    public void reply(final Account account, Email email, boolean save2Sent, CallBack callBack) {
+        mRemoteDataSource.reply(account, email, save2Sent, callBack);
+    }
+
+    public void forward(final Account account, Email email, boolean save2Sent, CallBack callBack) {
+        mRemoteDataSource.forward(account, email, save2Sent, callBack);
+    }
+
+    public void save2Drafts(final Account account, Email data, CallBack callBack) {
+        mRemoteDataSource.save2Drafts(account, data, callBack);
+    }
+
     /**
      * 刷新数据
      */
