@@ -2,8 +2,11 @@ package com.example.emailmanagerdagger.send;
 
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.Email;
+import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.EmailDataSource;
 import com.example.emailmanagerdagger.data.source.EmailRepository;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
@@ -23,16 +26,19 @@ public class SendEmailPresenter implements SendEmailContract.Presenter, EmailDat
 
     @Override
     public void send(Account account, Email email, boolean isSave) {
+        mView.showWaitingView("正在发送...");
         mRepository.send(account, email, isSave, this);
     }
 
     @Override
     public void reply(Account account, Email email, boolean isSave) {
+        mView.showWaitingView("正在回复...");
         mRepository.reply(account, email, isSave, this);
     }
 
     @Override
     public void forward(Account account, Email email, boolean isSave) {
+        mView.showWaitingView("正在转发...");
         mRepository.forward(account, email, isSave, this);
     }
 
@@ -42,13 +48,20 @@ public class SendEmailPresenter implements SendEmailContract.Presenter, EmailDat
     }
 
     @Override
+    public void downloadAttachment(Account account, File file, EmailParams params, long total) {
+
+    }
+
+    @Override
     public void save2Drafts(Account account, Email email) {
+        mView.showWaitingView("正在保存...");
         mRepository.save2Drafts(account, email, new EmailDataSource.CallBack() {
             @Override
             public void onSuccess() {
                 if (mView == null) {
                     return;
                 }
+                mView.closeWaitingView();
                 mView.saveSuccess();
             }
 
@@ -57,6 +70,7 @@ public class SendEmailPresenter implements SendEmailContract.Presenter, EmailDat
                 if (mView == null) {
                     return;
                 }
+                mView.closeWaitingView();
                 mView.handleError("保存失败");
             }
         });
@@ -67,11 +81,13 @@ public class SendEmailPresenter implements SendEmailContract.Presenter, EmailDat
         if (mView == null) {
             return;
         }
+        mView.closeWaitingView();
         mView.sendSuccess();
     }
 
     @Override
     public void onError() {
+        mView.closeWaitingView();
         mView.handleError("发送失败");
     }
 

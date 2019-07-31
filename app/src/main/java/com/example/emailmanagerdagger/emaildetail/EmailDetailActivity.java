@@ -30,6 +30,7 @@ import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.emaildetail.adapter.AttachmentListAdapter;
+import com.example.emailmanagerdagger.send.SendEmailActivity;
 import com.example.multifile.XRMultiFile;
 import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
@@ -57,6 +58,7 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
     private Toolbar toolbar;
     private WebView webView;
     private AttachmentListAdapter listAdapter;
+    private Email mEmail;
 
     AttachmentListAdapter.ItemListener mItemListener = new AttachmentListAdapter.ItemListener() {
         @Override
@@ -127,6 +129,7 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
 
     @Override
     public void showEmailDetail(Email email) {
+        this.mEmail = email;
         toolbar.setTitle(TextUtils.isEmpty(email.getPersonal()) ? email.getFrom() : email.getPersonal());
         receiver.append(email.getTo());
         cc.setVisibility(TextUtils.isEmpty(email.getCc()) ? View.GONE : View.VISIBLE);
@@ -187,12 +190,12 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
 
     @Override
     public void showForwardUi() {
-        Snackbar.make(getCurrentFocus(), "Forward", Snackbar.LENGTH_SHORT).show();
+        SendEmailActivity.start2SendEmailActivity(this, mEmail, SendEmailActivity.FORWARD);
     }
 
     @Override
     public void showReplyUi() {
-        Snackbar.make(getCurrentFocus(), "Reply", Snackbar.LENGTH_SHORT).show();
+        SendEmailActivity.start2SendEmailActivity(this, mEmail, SendEmailActivity.REPLY);
     }
 
     @Override

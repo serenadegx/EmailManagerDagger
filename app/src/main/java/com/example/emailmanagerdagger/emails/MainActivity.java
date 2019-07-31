@@ -18,9 +18,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.emails.drafts.DraftsFragment;
 import com.example.emailmanagerdagger.emails.inbox.InboxFragment;
 import com.example.emailmanagerdagger.emails.sent.SentFragment;
+import com.example.emailmanagerdagger.send.SendEmailActivity;
 import com.example.emailmanagerdagger.settings.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -49,8 +51,7 @@ public class MainActivity extends DaggerAppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                SendEmailActivity.start2SendEmailActivity(MainActivity.this, new Email(), SendEmailActivity.SEND);
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

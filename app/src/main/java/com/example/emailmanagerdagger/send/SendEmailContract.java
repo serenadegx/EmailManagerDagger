@@ -4,6 +4,9 @@ import com.example.emailmanagerdagger.BasePresenter;
 import com.example.emailmanagerdagger.BaseView;
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.Email;
+import com.example.emailmanagerdagger.data.EmailParams;
+
+import java.io.File;
 
 public interface SendEmailContract {
     interface View extends BaseView {
@@ -13,11 +16,25 @@ public interface SendEmailContract {
 
         void showSaveDialog();
 
+        void showWaitingView(String msg);
+
+        void closeWaitingView();
+
         void saveSuccess();
 
         void sendSuccess();
 
         void handleError(String msg);
+
+        void showDownloadDialog();
+
+        void downloadStart(int index);
+
+        void downloadProgress(int index, float percent);
+
+        void downloadFinish(int index);
+
+        void downloadError(int index);
     }
 
     interface Presenter extends BasePresenter<View> {
@@ -31,6 +48,8 @@ public interface SendEmailContract {
         void forward(Account account, Email email, boolean isSave);
 
         void addAttachment();
+
+        void downloadAttachment(Account account, File file, EmailParams params, long total);
 
         void save2Drafts(Account account, Email email);
     }

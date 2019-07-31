@@ -12,7 +12,6 @@ import com.example.emailmanagerdagger.utils.AppExecutors;
 import com.sun.mail.smtp.SMTPTransport;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +35,6 @@ import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
-import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
@@ -225,250 +223,284 @@ public class EmailRemoteDataSource implements EmailDataSource {
         mAppExecutors.getNetWorkIO().execute(runnable);
     }
 
-    public void send(final Account account, Email email, boolean save2Sent, CallBack callBack) {
-        Properties props = System.getProperties();
-        props.put(account.getConfig().getSendHostKey(), account.getConfig().getSendHostValue());
-        props.put(account.getConfig().getSendPortKey(), account.getConfig().getSendPortValue());
-        props.put(account.getConfig().getSendEncryptKey(), account.getConfig().getSendEncryptValue());
-        props.put(account.getConfig().getAuthKey(), account.getConfig().getAuthValue());
-        Session session = Session.getInstance(props, new Authenticator() {
+    public void send(final Account account, final Email email, final boolean save2Sent, final CallBack callBack) {
+        Runnable runnable = new Runnable() {
             @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        account.getAccount(), account.getPwd());
-            }
-        });
-        SMTPTransport t = null;
-        try {
-            Message msg = new MimeMessage(session);
-            if (email.getFrom() != null) {
+            public void run() {
+                Properties props = System.getProperties();
+                props.put(account.getConfig().getSendHostKey(), account.getConfig().getSendHostValue());
+                props.put(account.getConfig().getSendPortKey(), account.getConfig().getSendPortValue());
+                props.put(account.getConfig().getSendEncryptKey(), account.getConfig().getSendEncryptValue());
+                props.put(account.getConfig().getAuthKey(), account.getConfig().getAuthValue());
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                account.getAccount(), account.getPwd());
+                    }
+                });
+                SMTPTransport t = null;
                 try {
-                    msg.setFrom(new InternetAddress(email.getFrom(), account.getPersonal()));
-                } catch (MessagingException e) {
+                    Message msg = new MimeMessage(session);
+                    if (email.getFrom() != null) {
+                        try {
+                            msg.setFrom(new InternetAddress(email.getFrom(), account.getPersonal()));
+                        } catch (MessagingException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    msg.setRecipients(Message.RecipientType.TO,
+                            InternetAddress.parse(email.getTo(), false));
+                    if (email.getCc() != null)
+                        //抄送人
+                        msg.setRecipients(Message.RecipientType.CC,
+                                InternetAddress.parse(email.getCc(), false));
+                    if (email.getBcc() != null)
+                        //秘密抄送人
+                        msg.setRecipients(Message.RecipientType.BCC,
+                                InternetAddress.parse(email.getBcc(), false));
+
+                    msg.setSubject(email.getSubject());
+
+                    MimeMultipart mp = new MimeMultipart();
+                    MimeBodyPart mbp1 = new MimeBodyPart();
+                    mbp1.setText(email.getContent());
+                    mp.addBodyPart(mbp1);
+                    if (email.getAttachments() != null && email.getAttachments().size() > 0) {
+                        for (Attachment detail1 : email.getAttachments()) {
+                            MimeBodyPart mbp2 = new MimeBodyPart();
+                            mbp2.attachFile(detail1.getPath());
+                            mp.addBodyPart(mbp2);
+                        }
+                    }
+                    msg.setContent(mp);
+                    msg.setSentDate(new Date());
+                    t = (SMTPTransport) session.getTransport(account.getConfig().getSendProtocol());
+                    t.connect();
+                    t.sendMessage(msg, msg.getAllRecipients());
+                    if (save2Sent) {
+                        save2Sent(account, msg);
+                    }
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onSuccess();
+                        }
+                    });
+                } catch (Exception e) {
                     e.printStackTrace();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onError();
+                        }
+                    });
+                } finally {
+                    try {
+                        if (t != null)
+                            t.close();
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-            msg.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(email.getTo(), false));
-            if (email.getCc() != null)
-                //抄送人
-                msg.setRecipients(Message.RecipientType.CC,
-                        InternetAddress.parse(email.getCc(), false));
-            if (email.getBcc() != null)
-                //秘密抄送人
-                msg.setRecipients(Message.RecipientType.BCC,
-                        InternetAddress.parse(email.getBcc(), false));
+        };
+        mAppExecutors.getNetWorkIO().execute(runnable);
 
-            msg.setSubject(email.getSubject());
-
-            MimeMultipart mp = new MimeMultipart();
-            MimeBodyPart mbp1 = new MimeBodyPart();
-            mbp1.setText(email.getContent());
-            mp.addBodyPart(mbp1);
-            if (email.getAttachments() != null && email.getAttachments().size() > 0) {
-                for (Attachment detail1 : email.getAttachments()) {
-                    MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail1.getPath());
-                    mp.addBodyPart(mbp2);
-                }
-            }
-            msg.setContent(mp);
-            msg.setSentDate(new Date());
-            t = (SMTPTransport) session.getTransport(account.getConfig().getSendProtocol());
-            t.connect();
-            t.sendMessage(msg, msg.getAllRecipients());
-            if (save2Sent) {
-                save2Sent(account, msg);
-            }
-            callBack.onSuccess();
-        } catch (SendFailedException e) {
-            e.printStackTrace();
-            callBack.onError();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-            callBack.onError();
-        } catch (MessagingException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } catch (IOException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } finally {
-            try {
-                if (t != null)
-                    t.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
-    public void reply(final Account account, Email email, boolean save2Sent, CallBack callBack) {
-        Properties props = System.getProperties();
-        props.put(account.getConfig().getSendHostKey(), account.getConfig().getSendHostValue());
-        props.put(account.getConfig().getSendPortKey(), account.getConfig().getSendPortValue());
-        props.put(account.getConfig().getSendEncryptKey(), account.getConfig().getSendEncryptValue());
-        props.put(account.getConfig().getAuthKey(), account.getConfig().getAuthValue());
-        Session session = Session.getInstance(props, new Authenticator() {
+    public void reply(final Account account, final Email email, final boolean save2Sent, final CallBack callBack) {
+        Runnable runnable = new Runnable() {
             @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        account.getAccount(), account.getPwd());
-            }
-        });
-        Folder folder = null;
-        Store store = null;
-        SMTPTransport t = null;
-        try {
-            store = session.getStore(account.getConfig().getReceiveProtocol());
-            store.connect();
-            folder = store.getFolder("inbox");
-            folder.open(Folder.READ_ONLY);
-            Message message = folder.getMessage((int) email.getId().longValue());
-            Message forward = new MimeMessage(session);
-            if (email.getFrom() != null) {
-                forward.setFrom(new InternetAddress(email.getFrom(), account.getPersonal()));
-            }
+            public void run() {
+                Properties props = System.getProperties();
+                props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
+                props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
+                props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
 
-            forward.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(email.getTo(), false));
-            if (email.getCc() != null)
-                //抄送人
-                forward.setRecipients(Message.RecipientType.CC,
-                        InternetAddress.parse(email.getCc(), false));
-            if (email.getBcc() != null)
-                //秘密抄送人
-                forward.setRecipients(Message.RecipientType.BCC,
-                        InternetAddress.parse(email.getBcc(), false));
+                props.put(account.getConfig().getSendHostKey(), account.getConfig().getSendHostValue());
+                props.put(account.getConfig().getSendPortKey(), account.getConfig().getSendPortValue());
+                props.put(account.getConfig().getSendEncryptKey(), account.getConfig().getSendEncryptValue());
+                props.put(account.getConfig().getAuthKey(), account.getConfig().getAuthValue());
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                account.getAccount(), account.getPwd());
+                    }
+                });
+                session.setDebug(true);
+                Folder folder = null;
+                Store store = null;
+                SMTPTransport t = null;
+                try {
+                    store = session.getStore(account.getConfig().getReceiveProtocol());
+                    store.connect();
+                    folder = store.getFolder("inbox");
+                    folder.open(Folder.READ_ONLY);
+                    Message message = folder.getMessage(email.getMessageId());
+                    Message forward = new MimeMessage(session);
+                    if (email.getFrom() != null) {
+                        forward.setFrom(new InternetAddress(email.getFrom(), account.getPersonal()));
+                    }
 
-            forward.setSubject(email.getSubject());
+                    forward.setRecipients(Message.RecipientType.TO,
+                            InternetAddress.parse(email.getTo(), false));
+                    if (email.getCc() != null)
+                        //抄送人
+                        forward.setRecipients(Message.RecipientType.CC,
+                                InternetAddress.parse(email.getCc(), false));
+                    if (email.getBcc() != null)
+                        //秘密抄送人
+                        forward.setRecipients(Message.RecipientType.BCC,
+                                InternetAddress.parse(email.getBcc(), false));
 
-            MimeMultipart mp = new MimeMultipart();
-            MimeBodyPart mbp1 = new MimeBodyPart();
-            mbp1.setDataHandler(collect(email, message));
-            mp.addBodyPart(mbp1);
-            if (email.getAttachments() != null && email.getAttachments().size() > 0) {
-                for (Attachment detail1 : email.getAttachments()) {
-                    MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail1.getPath());
-                    mp.addBodyPart(mbp2);
+                    forward.setSubject(email.getSubject());
+
+                    MimeMultipart mp = new MimeMultipart();
+                    MimeBodyPart mbp1 = new MimeBodyPart();
+                    mbp1.setDataHandler(collect(email, message));
+                    mp.addBodyPart(mbp1);
+                    if (email.getAttachments() != null && email.getAttachments().size() > 0) {
+                        for (Attachment detail1 : email.getAttachments()) {
+                            MimeBodyPart mbp2 = new MimeBodyPart();
+                            mbp2.attachFile(detail1.getPath());
+                            mp.addBodyPart(mbp2);
+                        }
+                    }
+                    forward.setContent(mp);
+                    forward.saveChanges();
+                    forward.setSentDate(new Date());
+                    t = (SMTPTransport) session.getTransport(account.getConfig().getSendProtocol());
+                    t.connect();
+                    t.sendMessage(forward, forward.getAllRecipients());
+                    if (save2Sent) {
+                        save2Sent(account, forward);
+                    }
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onSuccess();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onError();
+                        }
+                    });
+                } finally {
+                    try {
+                        if (t != null)
+                            t.close();
+                        if (folder != null)
+                            folder.close();
+                        if (store != null)
+                            store.close();
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-            forward.setContent(mp);
-            forward.saveChanges();
-            forward.setSentDate(new Date());
-            t = (SMTPTransport) session.getTransport(account.getConfig().getSendProtocol());
-            t.connect();
-            t.sendMessage(forward, forward.getAllRecipients());
-            if (save2Sent) {
-                save2Sent(account, forward);
-            }
-            callBack.onSuccess();
-        } catch (NoSuchProviderException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } catch (IOException e) {
-            callBack.onError();
-            e.printStackTrace();
-        } finally {
-            try {
-                if (t != null)
-                    t.close();
-                if (folder != null)
-                    folder.close();
-                if (store != null)
-                    store.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
+        };
+        mAppExecutors.getNetWorkIO().execute(runnable);
+
     }
 
     public void forward(Account account, Email email, boolean save2Sent, CallBack callBack) {
         reply(account, email, save2Sent, callBack);
     }
 
-    public void save2Drafts(final Account account, Email data, CallBack callBack) {
-        Properties props = System.getProperties();
-        props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
-        props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
-        props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
-        Session session = Session.getInstance(props, new Authenticator() {
+    public void save2Drafts(final Account account, final Email data, final CallBack callBack) {
+        Runnable runnable = new Runnable() {
             @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        account.getAccount(), account.getPwd());
-            }
-        });
-        session.setDebug(true);
-        MimeMessage msg = new MimeMessage(session);
-        Folder drafts;
-        Store store = null;
-        try {
-            //打开草稿箱
-            store = session.getStore(account.getConfig().getReceiveProtocol());
-            store.connect();
-            drafts = store.getFolder("Drafts");
+            public void run() {
+                Properties props = System.getProperties();
+                props.put(account.getConfig().getReceiveHostKey(), account.getConfig().getReceiveHostValue());
+                props.put(account.getConfig().getReceivePortKey(), account.getConfig().getReceivePortValue());
+                props.put(account.getConfig().getReceiveEncryptKey(), account.getConfig().getReceiveEncryptValue());
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                                account.getAccount(), account.getPwd());
+                    }
+                });
+                session.setDebug(true);
+                MimeMessage msg = new MimeMessage(session);
+                Folder drafts = null;
+                Store store = null;
+                try {
+                    //打开草稿箱
+                    store = session.getStore(account.getConfig().getReceiveProtocol());
+                    store.connect();
+                    drafts = store.getFolder("Drafts");
 
-            if (data.getFrom() != null) {
-                msg.setFrom(new InternetAddress(data.getFrom(), account.getPersonal()));
-            }
-            msg.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(data.getTo(), false));
-            if (data.getCc() != null)
-                //抄送人
-                msg.setRecipients(Message.RecipientType.CC,
-                        InternetAddress.parse(data.getCc(), false));
-            if (data.getBcc() != null)
-                //秘密抄送人
-                msg.setRecipients(Message.RecipientType.BCC,
-                        InternetAddress.parse(data.getBcc(), false));
+                    if (data.getFrom() != null) {
+                        msg.setFrom(new InternetAddress(data.getFrom(), account.getPersonal()));
+                    }
+                    msg.setRecipients(Message.RecipientType.TO,
+                            InternetAddress.parse(data.getTo(), false));
+                    if (data.getCc() != null)
+                        //抄送人
+                        msg.setRecipients(Message.RecipientType.CC,
+                                InternetAddress.parse(data.getCc(), false));
+                    if (data.getBcc() != null)
+                        //秘密抄送人
+                        msg.setRecipients(Message.RecipientType.BCC,
+                                InternetAddress.parse(data.getBcc(), false));
 
-            msg.setSubject(data.getSubject());
+                    msg.setSubject(data.getSubject());
 
-            MimeMultipart mp = new MimeMultipart();
-            MimeBodyPart mbp1 = new MimeBodyPart();
-            mbp1.setText(data.getContent());
-            mp.addBodyPart(mbp1);
-            if (data.getAttachments() != null && data.getAttachments().size() > 0) {
-                for (Attachment detail1 : data.getAttachments()) {
-                    MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail1.getPath());
-                    mp.addBodyPart(mbp2);
+                    MimeMultipart mp = new MimeMultipart();
+                    MimeBodyPart mbp1 = new MimeBodyPart();
+                    mbp1.setText(data.getContent());
+                    mp.addBodyPart(mbp1);
+                    if (data.getAttachments() != null && data.getAttachments().size() > 0) {
+                        for (Attachment detail1 : data.getAttachments()) {
+                            MimeBodyPart mbp2 = new MimeBodyPart();
+                            mbp2.attachFile(detail1.getPath());
+                            mp.addBodyPart(mbp2);
+                        }
+                    }
+                    msg.setContent(mp);
+                    msg.setSentDate(new Date());
+
+                    //保存到草稿箱
+                    msg.saveChanges();
+                    msg.setFlag(Flags.Flag.DRAFT, true);
+                    MimeMessage[] draftMessages = {msg};
+                    drafts.appendMessages(draftMessages);
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onSuccess();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onError();
+                        }
+                    });
+                } finally {
+                    try {
+                        if (drafts != null)
+                            drafts.close();
+                        if (store != null)
+                            store.close();
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-            msg.setContent(mp);
-            msg.setSentDate(new Date());
+        };
+        mAppExecutors.getNetWorkIO().execute(runnable);
 
-            //保存到草稿箱
-            msg.saveChanges();
-            msg.setFlag(Flags.Flag.DRAFT, true);
-            MimeMessage[] draftMessages = {msg};
-            drafts.appendMessages(draftMessages);
-            callBack.onSuccess();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            callBack.onError();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-//                if (drafts!=null)
-//                    drafts.close();
-                if (store != null)
-                    store.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override

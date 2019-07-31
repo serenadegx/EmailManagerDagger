@@ -39,7 +39,7 @@ public class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAd
         final Attachment attachment = mData.get(position);
         holder.filename.setText(attachment.getFileName());
         holder.size.setText(attachment.getSize());
-        holder.bt.setText(attachment.isDownload() ? "打开" : "下载");
+        holder.bt.setText(attachment.isDownload() ? "删除" : "下载");
         holder.bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,7 +59,7 @@ public class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAd
     }
 
 
-    interface ItemListener {
+    public interface ItemListener {
         void onEmailItemClick(int position, Attachment data);
     }
 
