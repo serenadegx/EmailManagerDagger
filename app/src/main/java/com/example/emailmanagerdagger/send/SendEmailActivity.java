@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -55,6 +56,7 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
     public static final int REPLY = 2;
     public static final int FORWARD = 3;
     public static final int DRAFTS = 4;
+    private static final int REQUEST_PERMISSIONS = 715;
 
     @Inject
     SendEmailContract.Presenter mPresenter;
@@ -62,7 +64,7 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
     private int mAction;
     private boolean isSave;
     private Toolbar toolbar;
-    private EditText receiver, cc, bcc, send, subject, content, rv;
+    private EditText receiver, cc, bcc, send, subject, content;
     private RecyclerView rvAttachment;
     private String mPersonal;
     private AttachmentListAdapter listAdapter;
@@ -71,7 +73,7 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
     AttachmentListAdapter.ItemListener mItemListener = new AttachmentListAdapter.ItemListener() {
         @Override
         public void onEmailItemClick(int position, Attachment data) {
-
+            listAdapter.delete(position);
         }
     };
     private LinearLayout mWaitingView;
@@ -143,7 +145,7 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
                     email.setMessageId(mEmail.getMessageId());
                     mPresenter.forward(EmailApplication.getAccount(), email, isSave);
                     break;
-                default:
+                case DRAFTS:
                     mPresenter.send(EmailApplication.getAccount(), email, isSave);
                     break;
             }
@@ -176,10 +178,18 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
         if (mAction == REPLY) {
             receiver.setText(mEmail.getFrom());
             subject.setText("回复:" + mEmail.getSubject());
+            content.setText(TextUtils.isEmpty(EmailApplication.getAccount().getRemark()) ? null :
+                    "\n" + EmailApplication.getAccount().getRemark());
         } else if (mAction == FORWARD) {
             subject.setText("转发:" + mEmail.getSubject());
+            content.setText(TextUtils.isEmpty(EmailApplication.getAccount().getRemark()) ? null :
+                    "\n" + EmailApplication.getAccount().getRemark());
             if (mEmail.getAttachments() != null && mEmail.getAttachments().size() > 0) {
-                listAdapter.setNewData(mEmail.getAttachments());
+                items = mEmail.getAttachments();
+                listAdapter.setNewData(items);
+                if (shouldDownload(items)) {
+                    showDownloadDialog();
+                }
             }
         } else if (mAction == DRAFTS) {
             receiver.setText(mEmail.getTo().substring(0, mEmail.getTo().lastIndexOf(";")));
@@ -188,8 +198,14 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
             subject.setText(mEmail.getSubject());
             content.setText(mEmail.getContent());
             if (mEmail.getAttachments() != null && mEmail.getAttachments().size() > 0) {
-                listAdapter.setNewData(mEmail.getAttachments());
+                items = mEmail.getAttachments();
+                listAdapter.setNewData(items);
+                if (shouldDownload(items)) {
+                    showDownloadDialog();
+                }
             }
+        }else {
+
         }
         send.setText(account);
     }
@@ -274,7 +290,7 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
     public void showDownloadDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("提示信息")
-                .setMessage("是否下载转发邮件中的附件")
+                .setMessage("转发需要下载邮件中的附件，否则转发无附件")
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -284,54 +300,81 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                        for (int i = 0; i < items.size(); i++) {
-                            Attachment item = items.get(i);
-                            File dir = new File(Environment.getExternalStorageDirectory(), "EmailManager");
-                            if (!dir.exists()) {
-                                dir.mkdir();
-                            }
-                            final File file = new File(dir, item.getFileName());
-                            if (!file.exists()) {
-                                try {
-                                    file.createNewFile();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            EmailParams emailParams = new EmailParams();
-                            emailParams.setIndex(i);
-                            emailParams.setCategory(mEmail.getCategory());
-                            mPresenter.downloadAttachment(EmailApplication.getAccount(), file, emailParams, item.getTotal());
+                        if (ContextCompat.checkSelfPermission(SendEmailActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                            autoDownload();
+                        } else {
+                            ActivityCompat.requestPermissions(SendEmailActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
                         }
+
                     }
                 }).show();
     }
 
     @Override
     public void downloadStart(int index) {
-
+        listAdapter.downloadStart(index);
     }
 
     @Override
     public void downloadProgress(int index, float percent) {
-
+        listAdapter.updateProgress(index, percent);
     }
 
     @Override
     public void downloadFinish(int index) {
-
+        listAdapter.downloadFinish(index);
     }
 
     @Override
     public void downloadError(int index) {
+        listAdapter.downloadError(index);
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS) {
+            autoDownload();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mPresenter.dropView();
+    }
+
+    private boolean shouldDownload(List<Attachment> items) {
+        boolean flag = false;
+        for (Attachment attachment : items) {
+            if (!attachment.isDownload()) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    }
+
+    private void autoDownload() {
+        for (int i = 0; i < items.size(); i++) {
+            Attachment item = items.get(i);
+            File dir = new File(Environment.getExternalStorageDirectory(), "EmailManager");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            final File file = new File(dir, item.getFileName());
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            EmailParams emailParams = new EmailParams();
+            emailParams.setIndex(i);
+            emailParams.setId(mEmail.getMessageId());
+            emailParams.setCategory(mEmail.getCategory());
+            mPresenter.downloadAttachment(EmailApplication.getAccount(), file, emailParams, item.getTotal());
+        }
     }
 
     private void setupAdapter() {

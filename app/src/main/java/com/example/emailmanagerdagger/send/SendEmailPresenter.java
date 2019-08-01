@@ -49,7 +49,32 @@ public class SendEmailPresenter implements SendEmailContract.Presenter, EmailDat
 
     @Override
     public void downloadAttachment(Account account, File file, EmailParams params, long total) {
+        mView.downloadStart(params.getIndex());
+        mRepository.download(account, file, params, total, new EmailDataSource.DownloadCallback() {
+            @Override
+            public void onProgress(int index, float percent) {
+                if (mView == null) {
+                    return;
+                }
+                mView.downloadProgress(index, percent);
+            }
 
+            @Override
+            public void onFinish(int index) {
+                if (mView == null) {
+                    return;
+                }
+                mView.downloadFinish(index);
+            }
+
+            @Override
+            public void onError(int index) {
+                if (mView == null) {
+                    return;
+                }
+                mView.downloadError(index);
+            }
+        });
     }
 
     @Override
