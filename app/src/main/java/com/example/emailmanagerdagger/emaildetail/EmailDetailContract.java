@@ -26,6 +26,8 @@ public interface EmailDetailContract {
 
         void showReplyUi();
 
+        void showEditUi();
+
         void downloadStart(int index);
 
         void downloadProgress(int index, float percent);
@@ -43,6 +45,8 @@ public interface EmailDetailContract {
         void reply();
 
         void forward();
+
+        void edit();
 
         void downloadAttachment(Account account, File file, EmailParams params, long total);
     }

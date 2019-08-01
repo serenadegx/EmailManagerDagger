@@ -20,6 +20,7 @@ import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
+import com.example.emailmanagerdagger.send.SendEmailActivity;
 import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
 

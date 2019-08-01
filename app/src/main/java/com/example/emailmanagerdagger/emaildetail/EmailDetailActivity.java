@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
@@ -199,6 +201,11 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
     }
 
     @Override
+    public void showEditUi() {
+        SendEmailActivity.start2SendEmailActivity(this, mEmail, SendEmailActivity.DRAFTS);
+    }
+
+    @Override
     public void downloadStart(int index) {
         listAdapter.downloadStart(index);
     }
@@ -231,6 +238,20 @@ public class EmailDetailActivity extends DaggerAppCompatActivity implements Emai
                 showDeleteUi();
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (mEmailParams.getCategory() == EmailParams.Category.DRAFTS) {
+            getMenuInflater().inflate(R.menu.edit, menu);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mPresenter.edit();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

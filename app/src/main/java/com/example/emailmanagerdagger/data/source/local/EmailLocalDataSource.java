@@ -101,6 +101,7 @@ public class EmailLocalDataSource implements EmailDataSource {
                 final List<Email> emails = mEmailDao.queryBuilder().where(EmailDao.Properties.Category
                         .eq(params.getCategory())).list();
                 mEmailDao.deleteInTx(emails);
+//                mEmailDao.deleteAll();
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);
@@ -122,6 +123,7 @@ public class EmailLocalDataSource implements EmailDataSource {
             public void run() {
                 for (int i = 0; i < emails.size(); i++) {
                     Email email = emails.get(i);
+
                     long id = mEmailDao.insert(email);
                     Log.i("mango", "EMAIL._id:" + id);
                     List<Attachment> attachments = email.getAttachments();
