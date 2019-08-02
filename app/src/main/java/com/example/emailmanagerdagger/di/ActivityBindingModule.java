@@ -11,6 +11,8 @@ import com.example.emailmanagerdagger.emails.EmailsModule;
 import com.example.emailmanagerdagger.emails.MainActivity;
 import com.example.emailmanagerdagger.send.SendEmailActivity;
 import com.example.emailmanagerdagger.send.SendEmailModule;
+import com.example.emailmanagerdagger.settings.SettingsActivity;
+import com.example.emailmanagerdagger.settings.SettingsModule;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -40,4 +42,8 @@ public abstract class ActivityBindingModule {
     @ActivityScoped
     @ContributesAndroidInjector(modules = SendEmailModule.class)
     abstract SendEmailActivity sendEmailActivity();
+
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = SettingsModule.class)
+    abstract SettingsActivity settingsActivity();
 }

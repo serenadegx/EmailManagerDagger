@@ -5,13 +5,11 @@ import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.EmailDataSource;
 import com.example.emailmanagerdagger.data.source.EmailRepository;
-import com.example.emailmanagerdagger.di.ActivityScoped;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-@ActivityScoped
 public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSource.GetEmailsCallBack {
     private final EmailRepository mEmailRepository;
     private EmailsContract.View mView;

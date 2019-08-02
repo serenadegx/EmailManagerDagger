@@ -17,6 +17,7 @@ import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
 import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailParams;
+import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
@@ -32,6 +33,7 @@ import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
 
+@ActivityScoped
 public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout.OnRefreshListener, EmailsContract.View {
 
     @Inject

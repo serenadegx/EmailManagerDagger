@@ -30,6 +30,7 @@
             android:text="邮箱设置" />
 
         <RelativeLayout
+            android:id="@+id/rl_personal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
@@ -52,6 +53,7 @@
                 android:src="@mipmap/icon_arrow" />
 
             <TextView
+                android:id="@+id/tv_personal"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -69,6 +71,7 @@
             android:background="#EEE" />
 
         <RelativeLayout
+            android:id="@+id/rl_sign"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
@@ -91,6 +94,7 @@
                 android:src="@mipmap/icon_arrow" />
 
             <TextView
+                android:id="@+id/tv_sign"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -121,7 +125,7 @@
                 android:textColor="@android:color/black" />
 
             <Switch
-                android:id="@+id/toggle"
+                android:id="@+id/save_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -148,6 +152,7 @@
                 android:textColor="@android:color/black" />
 
             <Switch
+                android:id="@+id/remind_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
