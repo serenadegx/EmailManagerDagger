@@ -65,8 +65,6 @@ public class AdvancedFragment extends DaggerFragment implements SettingsContract
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setupListener();
-        mAccount = getArguments().getParcelable("account");
-        bindDetail(mAccount);
     }
 
     @Override
@@ -85,6 +83,7 @@ public class AdvancedFragment extends DaggerFragment implements SettingsContract
     public void onStart() {
         super.onStart();
         mPresenter.takeView(this);
+        bindDetail(mAccount = getArguments().getParcelable("account"));
     }
 
     @Override
