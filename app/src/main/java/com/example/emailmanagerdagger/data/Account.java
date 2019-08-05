@@ -1,5 +1,8 @@
 package com.example.emailmanagerdagger.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
@@ -7,7 +10,7 @@ import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
 @Entity
-public class Account {
+public class Account implements Parcelable {
     @Id(autoincrement = true)
     private Long id;
     @NotNull
@@ -46,6 +49,33 @@ public class Account {
 
     @Generated(hash = 1497256190)
     private transient Long config__resolvedKey;
+
+    protected Account(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readLong();
+        }
+        account = in.readString();
+        pwd = in.readString();
+        configId = in.readLong();
+        config = in.readParcelable(Configuration.class.getClassLoader());
+        isCur = in.readByte() != 0;
+        personal = in.readString();
+        remark = in.readString();
+    }
+
+    public static final Creator<Account> CREATOR = new Creator<Account>() {
+        @Override
+        public Account createFromParcel(Parcel in) {
+            return new Account(in);
+        }
+
+        @Override
+        public Account[] newArray(int size) {
+            return new Account[size];
+        }
+    };
 
     public void setId(Long id) {
         this.id = id;
@@ -188,5 +218,27 @@ public class Account {
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getAccountDao() : null;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeString(account);
+        dest.writeString(pwd);
+        dest.writeLong(configId);
+        dest.writeParcelable(config, flags);
+        dest.writeByte((byte) (isCur ? 1 : 0));
+        dest.writeString(personal);
+        dest.writeString(remark);
     }
 }

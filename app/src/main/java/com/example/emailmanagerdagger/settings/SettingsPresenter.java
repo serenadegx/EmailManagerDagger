@@ -93,6 +93,129 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     }
 
     @Override
+    public void jumpEditPersonal() {
+        final SettingsContract.SettingsView settingsView = (SettingsContract.SettingsView) mView;
+        settingsView.showEditPersonalUi();
+    }
+
+    @Override
+    public void jumpEditSign() {
+        final SettingsContract.SettingsView settingsView = (SettingsContract.SettingsView) mView;
+        settingsView.showEditSignUi();
+    }
+
+    @Override
+    public void getPersonal() {
+        final SettingsContract.EditPersonalView editPersonalView = (SettingsContract.EditPersonalView) mView;
+        mRepository.getAccount(new AccountDataSource.AccountCallBack() {
+            @Override
+            public void onAccountLoaded(Account data) {
+                if (editPersonalView != null && !editPersonalView.isActive()) {
+                    return;
+                }
+                editPersonalView.bindPersonal(data.getPersonal());
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                if (editPersonalView != null && !editPersonalView.isActive()) {
+                    return;
+                }
+                editPersonalView.handleError("获取失败");
+            }
+        });
+    }
+
+    @Override
+    public void getSign() {
+        final SettingsContract.EditSignView editSignView = (SettingsContract.EditSignView) mView;
+        mRepository.getAccount(new AccountDataSource.AccountCallBack() {
+            @Override
+            public void onAccountLoaded(Account data) {
+                if (editSignView != null && !editSignView.isActive()) {
+                    return;
+                }
+                editSignView.bindSign(data.getRemark());
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                if (editSignView != null && !editSignView.isActive()) {
+                    return;
+                }
+                editSignView.handleError("获取失败");
+            }
+        });
+    }
+
+    @Override
+    public void advancedEdit(Account account) {
+        final SettingsContract.AdvancedView advancedView = (SettingsContract.AdvancedView) mView;
+        mRepository.update(account, new AccountDataSource.CallBack() {
+            @Override
+            public void onSuccess() {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.editSuccess();
+            }
+
+            @Override
+            public void onError(String msg) {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.handleError(msg);
+            }
+        });
+    }
+
+    @Override
+    public void setCur(Account account) {
+        final SettingsContract.AdvancedView advancedView = (SettingsContract.AdvancedView) mView;
+        mRepository.setCurAccount(account, new AccountDataSource.CallBack() {
+            @Override
+            public void onSuccess() {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.setCurSuccess();
+            }
+
+            @Override
+            public void onError(String msg) {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.handleError(msg);
+            }
+        });
+        advancedView.setCurSuccess();
+    }
+
+    @Override
+    public void cancel(Account account) {
+        final SettingsContract.AdvancedView advancedView = (SettingsContract.AdvancedView) mView;
+        mRepository.delete(account, new AccountDataSource.CallBack() {
+            @Override
+            public void onSuccess() {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.cancelSuccess();
+            }
+
+            @Override
+            public void onError(String msg) {
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                advancedView.handleError(msg);
+            }
+        });
+    }
+
+    @Override
     public void takeView(BaseView view) {
         this.mView = view;
     }

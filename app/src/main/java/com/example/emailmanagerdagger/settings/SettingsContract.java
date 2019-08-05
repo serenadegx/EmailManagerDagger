@@ -10,7 +10,7 @@ public interface SettingsContract {
     interface SettingsView extends BaseView {
         boolean isActive();
 
-        void showSettingsDetail(List<Account> data, String personal,String sign);
+        void showSettingsDetail(List<Account> data, String personal, String sign);
 
         void showEditPersonalUi();
 
@@ -22,7 +22,7 @@ public interface SettingsContract {
     interface EditPersonalView extends BaseView {
         boolean isActive();
 
-        void bindPersonal();
+        void bindPersonal(String personal);
 
         void editSuccess();
 
@@ -32,9 +32,23 @@ public interface SettingsContract {
     interface EditSignView extends BaseView {
         boolean isActive();
 
-        void bindSign();
+        void bindSign(String sign);
 
         void editSuccess();
+
+        void handleError(String msg);
+    }
+
+    interface AdvancedView extends BaseView {
+        boolean isActive();
+
+        void bindDetail(Account account);
+
+        void editSuccess();
+
+        void setCurSuccess();
+
+        void cancelSuccess();
 
         void handleError(String msg);
     }
@@ -45,6 +59,20 @@ public interface SettingsContract {
         void editPersonal(String personal);
 
         void editSign(String sign);
+
+        void jumpEditPersonal();
+
+        void jumpEditSign();
+
+        void getPersonal();
+
+        void getSign();
+
+        void advancedEdit(Account account);
+
+        void setCur(Account account);
+
+        void cancel(Account account);
 
     }
 }

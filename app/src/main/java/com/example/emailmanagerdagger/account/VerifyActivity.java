@@ -38,8 +38,8 @@ public class VerifyActivity extends DaggerAppCompatActivity implements AccountCo
         pwd = findViewById(R.id.et_pwd);
         verify = findViewById(R.id.bt);
 
-        name.setText("guoxinrui@fantaike.ai");
-        pwd.setText("1993Gxr");
+        name.setText("1099805713@qq.com");
+        pwd.setText("fowzlpckwniyhadg");
 
         final Configuration config = getIntent().getParcelableExtra("config");
         verify.setOnClickListener(new View.OnClickListener() {

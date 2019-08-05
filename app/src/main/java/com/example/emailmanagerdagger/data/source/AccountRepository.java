@@ -49,8 +49,8 @@ public class AccountRepository implements AccountDataSource {
         mAccountLocalDataSource.getAccount(callBack);
     }
 
-    public void setCurAccount(Account account) {
-        mAccountLocalDataSource.setCurAccount(account);
+    public void setCurAccount(Account account, CallBack callBack) {
+        mAccountLocalDataSource.setCurAccount(account, callBack);
     }
 
     public void config(List<Configuration> data, CallBack callBack) {
@@ -59,5 +59,9 @@ public class AccountRepository implements AccountDataSource {
 
     public void getConfigs(ConfigsCallBack callBack) {
         mAccountLocalDataSource.getConfigs(callBack);
+    }
+
+    public void delete(Account account, CallBack callBack) {
+        mAccountLocalDataSource.delete(account, callBack);
     }
 }

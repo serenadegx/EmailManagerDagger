@@ -18,7 +18,12 @@ public abstract class SettingsModule {
     abstract EditPersonalFragment editPersonalFragment();
 
     @ViewScoped
+    @ContributesAndroidInjector
     abstract EditSignFragment editSignFragment();
+
+    @ViewScoped
+    @ContributesAndroidInjector
+    abstract AdvancedFragment advancedFragment();
 
     @ActivityScoped
     @Binds

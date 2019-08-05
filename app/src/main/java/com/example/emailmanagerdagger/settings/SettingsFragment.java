@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.account.EmailCategoryActivity;
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.settings.adapter.AccountListAdapter;
@@ -43,10 +44,19 @@ public class SettingsFragment extends DaggerFragment implements SettingsContract
     private AccountListAdapter listAdapter;
     private TextView tvPersonal, tvSign;
 
+    @Inject
+    public SettingsFragment() {
+    }
+
     AccountListAdapter.ItemListener mItemListener = new AccountListAdapter.ItemListener() {
         @Override
         public void onEmailItemClick(Account account) {
+            ((SettingsActivity)getActivity()).replaceFragmentInActivity(account);
+        }
 
+        @Override
+        public void onAddAccountClick() {
+            EmailCategoryActivity.start2EmailCategoryActivity(getContext());
         }
     };
 
@@ -74,36 +84,11 @@ public class SettingsFragment extends DaggerFragment implements SettingsContract
         setupListener();
     }
 
-    private void setupListener() {
-        editPersonal.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        editSign.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        save.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-        remind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
-    }
-
-    private void setupListAdapter() {
-        listAdapter = new AccountListAdapter(mItemListener, new ArrayList<Account>(0));
-        rv.setAdapter(listAdapter);
+    @Override
+    public void onStart() {
+        super.onStart();
+        mPresenter.takeView(this);
+        mPresenter.getSettings();
     }
 
     @Override
@@ -135,5 +120,47 @@ public class SettingsFragment extends DaggerFragment implements SettingsContract
     @Override
     public void handleError(String msg) {
         Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPresenter.dropView();
+    }
+
+    private void setupListener() {
+        editPersonal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.jumpEditPersonal();
+            }
+        });
+        editSign.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.jumpEditSign();
+            }
+        });
+        save.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                getActivity().getSharedPreferences("email",Context.MODE_PRIVATE).edit()
+                        .putBoolean("isSave",isChecked)
+                        .commit();
+            }
+        });
+        remind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                getActivity().getSharedPreferences("email",Context.MODE_PRIVATE).edit()
+                        .putBoolean("isRemind",isChecked)
+                        .commit();
+            }
+        });
+    }
+
+    private void setupListAdapter() {
+        listAdapter = new AccountListAdapter(mItemListener, new ArrayList<Account>(0));
+        rv.setAdapter(listAdapter);
     }
 }

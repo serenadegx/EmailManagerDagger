@@ -12,16 +12,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.emailmanagerdagger.R;
+import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.emails.inbox.InboxFragment;
 
 import javax.inject.Inject;
 
 import dagger.android.support.DaggerAppCompatActivity;
 
-public class SettingsActivity extends DaggerAppCompatActivity  {
+public class SettingsActivity extends DaggerAppCompatActivity {
     public static final String SETTINGS = "settings";
     public static final String SIGN_TAG = "editSignature";
     public static final String PERSONAL_TAG = "editPersonal";
+    public static final String ADVANCED_TAG = "advanced";
 
     @Inject
     SettingsFragment settingsFragment;
@@ -29,6 +31,8 @@ public class SettingsActivity extends DaggerAppCompatActivity  {
     EditPersonalFragment editPersonalFragment;
     @Inject
     EditSignFragment editSignFragment;
+    @Inject
+    AdvancedFragment advancedFragment;
     private Toolbar toolbar;
 
     @Override
@@ -38,6 +42,11 @@ public class SettingsActivity extends DaggerAppCompatActivity  {
         toolbar = findViewById(R.id.toolbar);
         setupToolbar();
         replaceFragmentInActivity(SETTINGS);
+    }
+
+    @Override
+    public void onBackPressed() {
+        backSelf();
     }
 
     private void setupToolbar() {
@@ -77,9 +86,22 @@ public class SettingsActivity extends DaggerAppCompatActivity  {
                     break;
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.container, fragment);
+            transaction.replace(R.id.content, fragment);
             transaction.commit();
         }
+    }
+
+    public void replaceFragmentInActivity(Account account) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("account", account);
+        if (fragment == null) {
+            fragment = advancedFragment;
+        }
+        fragment.setArguments(bundle);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.content, fragment);
+        transaction.commit();
     }
 
 

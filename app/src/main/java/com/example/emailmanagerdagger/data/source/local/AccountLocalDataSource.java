@@ -46,6 +46,8 @@ public class AccountLocalDataSource implements AccountDataSource {
                     }
                     mAccountDao.updateInTx(list);
                 }
+                account.setPersonal("EmailManager");
+                account.setRemark("From EmailManager");
                 final long id = mAccountDao.insert(account);
                 if (id > -1) {
                     callBack.onSuccess();
@@ -92,7 +94,7 @@ public class AccountLocalDataSource implements AccountDataSource {
         mAppExecutors.getDiskIO().execute(runnable);
     }
 
-    public void setCurAccount(final Account account) {
+    public void setCurAccount(final Account account, final CallBack callBack) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -106,6 +108,12 @@ public class AccountLocalDataSource implements AccountDataSource {
                     }
                 }
                 mAccountDao.updateInTx(accounts);
+                mAppExecutors.getMainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callBack.onSuccess();
+                    }
+                });
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);
@@ -179,6 +187,22 @@ public class AccountLocalDataSource implements AccountDataSource {
                         } else {
                             callBack.onConfigsLoaded(configs);
                         }
+                    }
+                });
+            }
+        };
+        mAppExecutors.getDiskIO().execute(runnable);
+    }
+
+    public void delete(final Account account, final CallBack callBack) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                mAccountDao.delete(account);
+                mAppExecutors.getMainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callBack.onSuccess();
                     }
                 });
             }
