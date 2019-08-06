@@ -113,12 +113,6 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     });
                     e.printStackTrace();
                 } catch (MessagingException e) {
-                    mAppExecutors.getMainThread().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onDataNotAvailable();
-                        }
-                    });
                     e.printStackTrace();
                 } catch (Exception e) {
                     mAppExecutors.getMainThread().execute(new Runnable() {
@@ -793,10 +787,16 @@ public class EmailRemoteDataSource implements EmailDataSource {
             }
         } catch (MessagingException e) {
             try {
-                data.setContent((String) p.getContent());
-            } catch (IOException e1) {
+                MimeMessage cmsg = new MimeMessage((MimeMessage) p);
+                Multipart mp = (Multipart) cmsg.getContent();
+                level++;
+                int count = mp.getCount();
+                for (int i = 0; i < count; i++)
+                    dumpPart(mp.getBodyPart(i), data);
+                level--;
+            }catch (MessagingException e1) {
                 e1.printStackTrace();
-            } catch (MessagingException e1) {
+            } catch (IOException e1) {
                 e1.printStackTrace();
             }
             e.printStackTrace();
