@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.data.source.AccountRepository;
+import com.example.emailmanagerdagger.data.source.EmailRepository;
 
 import javax.inject.Singleton;
 
@@ -32,6 +33,8 @@ import dagger.android.support.AndroidSupportInjectionModule;
 public interface AppComponent extends AndroidInjector<EmailApplication> {
 
     AccountRepository getAccountRepository();
+
+    EmailRepository getEmailRepository();
 
     @Component.Builder
     interface Builder {

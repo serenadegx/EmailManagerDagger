@@ -837,7 +837,9 @@ public class EmailRemoteDataSource implements EmailDataSource {
         InternetAddress address = (InternetAddress) message.getFrom()[0];
         data.setFrom(address.getAddress());
         data.setPersonal(address.getPersonal());
-        data.setSubject(MimeUtility.decodeText(message.getHeader("subject")[0]));
+        data.setSubject(message.getHeader("subject") == null || message
+                .getHeader("subject").length == 0 ? message.getSubject()
+                : MimeUtility.decodeText(message.getHeader("subject")[0]));
         data.setDate(dateFormat(message.getReceivedDate()));
     }
 

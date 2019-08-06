@@ -91,6 +91,14 @@ public class EmailRepository implements EmailDataSource {
         mRemoteDataSource.save2Drafts(account, data, callBack);
     }
 
+    public void addEmails(List<Email> data){
+        mLocalDataSource.saveAll(data);
+    }
+
+    public void deleteAll(CallBack callBack){
+        mLocalDataSource.deleteAll(callBack);
+    }
+
     /**
      * 刷新数据
      */

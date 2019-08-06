@@ -3,7 +3,6 @@ package com.example.emailmanagerdagger.emails;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,8 +14,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.example.emailmanagerdagger.EmailApplication;
+import com.example.emailmanagerdagger.newEmail.NewEmailWorker;
 import com.example.emailmanagerdagger.R;
 import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.emails.drafts.DraftsFragment;
@@ -26,7 +31,8 @@ import com.example.emailmanagerdagger.send.SendEmailActivity;
 import com.example.emailmanagerdagger.settings.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -40,6 +46,7 @@ public class MainActivity extends DaggerAppCompatActivity
     SentFragment sentFragment;
     @Inject
     DraftsFragment draftsFragment;
+    private View headerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +63,25 @@ public class MainActivity extends DaggerAppCompatActivity
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        View headerView = navigationView.getHeaderView(0);
-        ((TextView) headerView.findViewById(R.id.textView)).setText(EmailApplication.getAccount().getAccount());
+        headerView = navigationView.getHeaderView(0);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         replaceInboxFragmentInActivity(getSupportFragmentManager());
+
+        //启动新消息提醒任务
+        if (getSharedPreferences("email", MODE_PRIVATE).getBoolean("isRemind", false)) {
+            startNewEmailWorker();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((TextView) headerView.findViewById(R.id.textView)).setText(EmailApplication.getAccount().getAccount());
     }
 
     @Override
@@ -167,6 +185,20 @@ public class MainActivity extends DaggerAppCompatActivity
             transaction.replace(R.id.container, fragment);
             transaction.commit();
         }
+    }
+
+    public static void startNewEmailWorker() {
+        //设置约束条件
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)//网络可用
+                .build();
+
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(NewEmailWorker.class,
+                5, TimeUnit.MINUTES)//五分钟分钟执行一次
+                .setConstraints(constraints)
+                .build();
+        WorkManager.getInstance().enqueueUniquePeriodicWork("NewEmail",
+                ExistingPeriodicWorkPolicy.REPLACE, workRequest);
     }
 
     public static void start2MainActivity(Context context) {

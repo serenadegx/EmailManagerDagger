@@ -2,6 +2,7 @@ package com.example.emailmanagerdagger;
 
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.source.AccountRepository;
+import com.example.emailmanagerdagger.data.source.EmailRepository;
 import com.example.emailmanagerdagger.di.DaggerAppComponent;
 
 import javax.inject.Inject;
@@ -24,6 +25,9 @@ public class EmailApplication extends DaggerApplication {
     @Inject
     AccountRepository mAccountRepository;
 
+    @Inject
+    EmailRepository mEmailRepository;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -32,5 +36,9 @@ public class EmailApplication extends DaggerApplication {
     @Override
     protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
         return DaggerAppComponent.builder().application(this).build();
+    }
+
+    public EmailRepository getEmailRepository() {
+        return mEmailRepository;
     }
 }

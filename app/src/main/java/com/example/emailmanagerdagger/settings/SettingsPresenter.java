@@ -4,6 +4,8 @@ import com.example.emailmanagerdagger.BaseView;
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.source.AccountDataSource;
 import com.example.emailmanagerdagger.data.source.AccountRepository;
+import com.example.emailmanagerdagger.data.source.EmailDataSource;
+import com.example.emailmanagerdagger.data.source.EmailRepository;
 
 import java.util.List;
 
@@ -11,13 +13,15 @@ import javax.inject.Inject;
 
 public class SettingsPresenter implements SettingsContract.Presenter {
 
-    private AccountRepository mRepository;
+    private final EmailRepository mEmailRepository;
+    private final AccountRepository mRepository;
     private BaseView mView;
     private Account cur;
 
     @Inject
-    public SettingsPresenter(AccountRepository repository) {
+    public SettingsPresenter(AccountRepository repository, EmailRepository emailRepository) {
         this.mRepository = repository;
+        this.mEmailRepository = emailRepository;
         cur = new Account();
     }
 
@@ -171,15 +175,29 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     }
 
     @Override
-    public void setCur(Account account) {
+    public void setCur(final Account account) {
         final SettingsContract.AdvancedView advancedView = (SettingsContract.AdvancedView) mView;
         mRepository.setCurAccount(account, new AccountDataSource.CallBack() {
             @Override
             public void onSuccess() {
-                if (advancedView != null && !advancedView.isActive()) {
-                    return;
-                }
-                advancedView.setCurSuccess();
+                mEmailRepository.deleteAll(new EmailDataSource.CallBack() {
+                    @Override
+                    public void onSuccess() {
+                        if (advancedView != null && !advancedView.isActive()) {
+                            return;
+                        }
+                        advancedView.setCurSuccess(account);
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (advancedView != null && !advancedView.isActive()) {
+                            return;
+                        }
+                        advancedView.handleError("删除失败");
+                    }
+                });
+
             }
 
             @Override
@@ -190,7 +208,6 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                 advancedView.handleError(msg);
             }
         });
-        advancedView.setCurSuccess();
     }
 
     @Override

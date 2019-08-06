@@ -46,7 +46,7 @@ public interface SettingsContract {
 
         void editSuccess();
 
-        void setCurSuccess();
+        void setCurSuccess(Account account);
 
         void cancelSuccess();
 

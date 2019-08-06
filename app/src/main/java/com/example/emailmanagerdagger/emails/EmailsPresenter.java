@@ -1,5 +1,7 @@
 package com.example.emailmanagerdagger.emails;
 
+import android.util.Log;
+
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailParams;
@@ -20,6 +22,7 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     public EmailsPresenter(EmailRepository mEmailRepository) {
         this.mEmailRepository = mEmailRepository;
         params = new EmailParams();
+        Log.i("mango", "EmailsPresenter --- EmailRepository:" + mEmailRepository);
     }
 
     @Override

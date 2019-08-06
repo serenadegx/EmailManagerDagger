@@ -14,10 +14,13 @@ import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.work.WorkManager;
 
+import com.example.emailmanagerdagger.EmailApplication;
 import com.example.emailmanagerdagger.R;
 import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.di.ActivityScoped;
+import com.example.emailmanagerdagger.emails.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import javax.inject.Inject;
@@ -110,7 +113,10 @@ public class AdvancedFragment extends DaggerFragment implements SettingsContract
     }
 
     @Override
-    public void setCurSuccess() {
+    public void setCurSuccess(Account account) {
+        EmailApplication.setAccount(account);
+        WorkManager.getInstance().cancelAllWork();
+        MainActivity.startNewEmailWorker();
         ((SettingsActivity) getActivity()).replaceFragmentInActivity(SettingsActivity.SETTINGS);
         Snackbar.make(getView(), "设置成功", Snackbar.LENGTH_SHORT).show();
     }

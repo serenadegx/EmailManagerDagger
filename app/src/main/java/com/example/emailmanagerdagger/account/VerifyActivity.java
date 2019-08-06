@@ -64,6 +64,9 @@ public class VerifyActivity extends DaggerAppCompatActivity implements AccountCo
 
     @Override
     public void onVerifySuccess() {
+        getSharedPreferences("email",Context.MODE_PRIVATE).edit()
+                .putBoolean("isRemind",true)
+                .commit();
         Snackbar.make(getCurrentFocus(), "登陆成功", Snackbar.LENGTH_SHORT).show();
         SystemClock.sleep(500);
         MainActivity.start2MainActivity(this);

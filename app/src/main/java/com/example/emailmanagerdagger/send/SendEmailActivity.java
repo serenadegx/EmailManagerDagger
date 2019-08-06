@@ -204,8 +204,8 @@ public class SendEmailActivity extends DaggerAppCompatActivity implements SendEm
                     showDownloadDialog();
                 }
             }
-        }else {
-
+        } else {
+            content.setText("\n" + EmailApplication.getAccount().getRemark());
         }
         send.setText(account);
     }

@@ -6,6 +6,8 @@ import com.example.emailmanagerdagger.data.Account;
 import com.example.emailmanagerdagger.data.source.AccountDataSource;
 import com.example.emailmanagerdagger.data.source.AccountRepository;
 import com.example.emailmanagerdagger.data.Configuration;
+import com.example.emailmanagerdagger.data.source.EmailDataSource;
+import com.example.emailmanagerdagger.data.source.EmailRepository;
 
 import java.util.List;
 
@@ -13,11 +15,13 @@ import javax.inject.Inject;
 
 public class AccountPresenter implements AccountContract.Presenter {
     private final AccountRepository mAccountRepository;
+    private final EmailRepository mEmailRepository;
     private BaseView mView;
 
     @Inject
-    public AccountPresenter(AccountRepository mAccountRepository) {
+    public AccountPresenter(AccountRepository mAccountRepository, EmailRepository emailRepository) {
         this.mAccountRepository = mAccountRepository;
+        this.mEmailRepository = emailRepository;
     }
 
     @Override
@@ -58,7 +62,16 @@ public class AccountPresenter implements AccountContract.Presenter {
                     return;
                 }
                 EmailApplication.setAccount(account);
-                accountView.onVerifySuccess();
+                mEmailRepository.deleteAll(new EmailDataSource.CallBack() {
+                    @Override
+                    public void onSuccess() {
+                        accountView.onVerifySuccess();
+                    }
+
+                    @Override
+                    public void onError() {
+                    }
+                });
             }
 
             @Override

@@ -70,7 +70,10 @@ public class EmailLocalDataSource implements EmailDataSource {
                         if (emails.isEmpty()) {
                             callBack.onDataNotAvailable();
                         } else {
-                            callBack.onEmailLoaded(emails.get(0));
+                            Email email = emails.get(0);
+                            email.setIsRead(true);
+                            mEmailDao.update(email);
+                            callBack.onEmailLoaded(email);
                         }
                     }
                 });
@@ -102,6 +105,23 @@ public class EmailLocalDataSource implements EmailDataSource {
                         .eq(params.getCategory())).list();
                 mEmailDao.deleteInTx(emails);
 //                mEmailDao.deleteAll();
+            }
+        };
+        mAppExecutors.getDiskIO().execute(runnable);
+    }
+
+    public void deleteAll(final CallBack callBack) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                mEmailDao.deleteAll();
+                mAttachmentDao.deleteAll();
+                mAppExecutors.getMainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callBack.onSuccess();
+                    }
+                });
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);
@@ -144,5 +164,4 @@ public class EmailLocalDataSource implements EmailDataSource {
             }
         });
     }
-
 }
