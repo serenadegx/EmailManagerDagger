@@ -73,7 +73,6 @@ public class NewEmailWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Log.i("mango", "NewEmailWorker --- EmailRepository:" + mRepository);
         Store store = null;
         try {
             store = session.getStore(account.getConfig().getReceiveProtocol());
@@ -85,7 +84,6 @@ public class NewEmailWorker extends Worker {
                 public void messagesAdded(MessageCountEvent e) {
                     final Message[] messages = e.getMessages();
                     if (messages != null && messages.length > 0) {
-                        Log.i("Mango", "您有" + messages.length + "条新邮件");
                         try {
                             List<Email> data = new ArrayList<>();
                             for (Message message : messages) {

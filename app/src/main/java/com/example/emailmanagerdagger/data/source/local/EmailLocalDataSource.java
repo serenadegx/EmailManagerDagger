@@ -143,24 +143,14 @@ public class EmailLocalDataSource implements EmailDataSource {
             public void run() {
                 for (int i = 0; i < emails.size(); i++) {
                     Email email = emails.get(i);
-
                     long id = mEmailDao.insert(email);
-                    Log.i("mango", "EMAIL._id:" + id);
                     List<Attachment> attachments = email.getAttachments();
                     for (int j = 0; j < attachments.size(); j++) {
                         Attachment attachment = attachments.get(j);
                         attachment.setAttachmentId(id);
-                        long insert = mAttachmentDao.insert(attachment);
-                        Log.i("mango", "ATTACHMENT._id:" + insert);
+                        mAttachmentDao.insert(attachment);
                     }
                 }
-//                for (Email email : emails) {
-//                    long id = mEmailDao.insert(email);
-//                    for (Attachment attachment : email.getAttachments()) {
-//                        attachment.setAttachmentId(id);
-//                        mAttachmentDao.insert(attachment);
-//                    }
-//                }
             }
         });
     }

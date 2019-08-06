@@ -89,7 +89,6 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     inbox.open(Folder.READ_ONLY);
                     Message[] messages = inbox.getMessages();
                     for (Message message : messages) {
-                        Log.i("mango", "messageId:" + message.getMessageNumber());
                         Email emailDetail = new Email();
                         emailDetail.setCategory(params.getCategory());
                         emailDetail.setAttachments(new ArrayList<Attachment>());
@@ -737,12 +736,10 @@ public class EmailRemoteDataSource implements EmailDataSource {
         try {
             if (p instanceof Message) {
                 dumpEnvelope((Message) p, data);
-//                Log.i("mango", ((Message) p).getMessageNumber() + "    MimeType:" + p.getContentType());
             }
             if (p.isMimeType("text/plain")) {
 //            This is plain text
                 data.setContent((String) p.getContent());
-//            System.out.println((String) p.getContent());
             } else if (p.isMimeType("multipart/*")) {
 //            This is a Multipart
                 Multipart mp = (Multipart) p.getContent();

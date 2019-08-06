@@ -22,7 +22,6 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     public EmailsPresenter(EmailRepository mEmailRepository) {
         this.mEmailRepository = mEmailRepository;
         params = new EmailParams();
-        Log.i("mango", "EmailsPresenter --- EmailRepository:" + mEmailRepository);
     }
 
     @Override
