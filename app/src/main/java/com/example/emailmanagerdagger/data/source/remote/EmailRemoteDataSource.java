@@ -9,6 +9,9 @@ import com.example.emailmanagerdagger.data.Email;
 import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.EmailDataSource;
 import com.example.emailmanagerdagger.utils.AppExecutors;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.smtp.SMTPTransport;
 
 import java.io.File;
@@ -19,7 +22,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -73,20 +78,37 @@ public class EmailRemoteDataSource implements EmailDataSource {
                                 account.getAccount(), account.getPwd());
                     }
                 });
-//        session.setDebug(true);
+                session.setDebug(true);
                 Store store = null;
-                Folder inbox = null;
+                IMAPFolder inbox = null;
                 try {
                     store = session.getStore(account.getConfig().getReceiveProtocol());
                     store.connect();
-                    if (params.getCategory() == EmailParams.Category.INBOX) {
-                        inbox = store.getFolder("INBOX");
-                    } else if (params.getCategory() == EmailParams.Category.SENT) {
-                        inbox = store.getFolder("Sent Messages");
-                    } else {
-                        inbox = store.getFolder("Drafts");
+                    Folder[] list = store.getDefaultFolder().list();
+                    for (Folder folder : list) {
+                        Log.i("mango", "folderName:" + folder.getName() + "URL_Name:" + folder.getURLName());
                     }
-                    inbox.open(Folder.READ_ONLY);
+                    if (params.getCategory() == EmailParams.Category.INBOX) {
+                        inbox = (IMAPFolder) store.getFolder("INBOX");
+                    } else if (params.getCategory() == EmailParams.Category.SENT) {
+                        inbox = (IMAPFolder) store.getFolder("Sent Messages");
+                    } else {
+                        inbox = (IMAPFolder) store.getFolder("Drafts");
+                    }
+                    if (account.getConfigId() == 3) {
+                        final Map<String, String> clientParams = new HashMap<String, String>();
+                        clientParams.put("name", "my-imap");
+                        clientParams.put("version", "1.0");
+                        inbox.doOptionalCommand("ID not supported",
+                                new IMAPFolder.ProtocolCommand() {
+                                    @Override
+                                    public Object doCommand(IMAPProtocol p)
+                                            throws ProtocolException {
+                                        return p.id(clientParams);
+                                    }
+                                });
+                    }
+                    inbox.open(Folder.READ_WRITE);
                     Message[] messages = inbox.getMessages();
                     for (Message message : messages) {
                         Email emailDetail = new Email();
@@ -114,6 +136,12 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     e.printStackTrace();
                 } catch (MessagingException e) {
                     e.printStackTrace();
+                    mAppExecutors.getMainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDataNotAvailable();
+                        }
+                    });
                 } catch (Exception e) {
                     mAppExecutors.getMainThread().execute(new Runnable() {
                         @Override
@@ -124,7 +152,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
                     e.printStackTrace();
                 } finally {
                     try {
-                        if (inbox != null)
+                        if (inbox != null && inbox.isOpen())
                             inbox.close();
                         if (store != null)
                             store.close();
@@ -794,7 +822,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
                 for (int i = 0; i < count; i++)
                     dumpPart(mp.getBodyPart(i), data);
                 level--;
-            }catch (MessagingException e1) {
+            } catch (MessagingException e1) {
                 e1.printStackTrace();
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -837,7 +865,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
         data.setSubject(message.getHeader("subject") == null || message
                 .getHeader("subject").length == 0 ? message.getSubject()
                 : MimeUtility.decodeText(message.getHeader("subject")[0]));
-        data.setDate(dateFormat(message.getReceivedDate()));
+        data.setDate(dateFormat(message.getReceivedDate() == null ? message.getSentDate() : message.getReceivedDate()));
     }
 
     private static String getPrintSize(long size) {

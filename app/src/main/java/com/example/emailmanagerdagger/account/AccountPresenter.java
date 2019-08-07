@@ -62,16 +62,9 @@ public class AccountPresenter implements AccountContract.Presenter {
                     return;
                 }
                 EmailApplication.setAccount(account);
-                mEmailRepository.deleteAll(new EmailDataSource.CallBack() {
-                    @Override
-                    public void onSuccess() {
-                        accountView.onVerifySuccess();
-                    }
+                mEmailRepository.deleteAll();
+                accountView.onVerifySuccess();
 
-                    @Override
-                    public void onError() {
-                    }
-                });
             }
 
             @Override

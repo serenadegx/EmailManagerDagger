@@ -43,7 +43,7 @@ public class AccountRemoteDataSource implements AccountDataSource {
                 session.setDebug(true);
                 Store store = null;
                 try {
-                    store = session.getStore("imap");
+                    store = session.getStore(account.getConfig().getReceiveProtocol());
                     store.connect();
                     mAppExecutors.getMainThread().execute(new Runnable() {
                         @Override
@@ -51,23 +51,12 @@ public class AccountRemoteDataSource implements AccountDataSource {
                             callBack.onSuccess();
                         }
                     });
-
                 } catch (NoSuchProviderException e) {
-                    mAppExecutors.getMainThread().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onError("未知错误");
-                        }
-                    });
                     e.printStackTrace();
+                    callBack.onError("未知错误");
                 } catch (MessagingException e) {
-                    mAppExecutors.getMainThread().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onError("账号或密码错误");
-                        }
-                    });
                     e.printStackTrace();
+                    callBack.onError("账号或密码错误");
                 } finally {
                     try {
                         if (store != null)

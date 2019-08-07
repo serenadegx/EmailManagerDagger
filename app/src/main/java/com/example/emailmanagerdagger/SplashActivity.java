@@ -82,6 +82,29 @@ public class SplashActivity extends DaggerAppCompatActivity implements SplashCon
         config2.setAuthKey(array2[15]);
         config2.setAuthValue("1".equals(array2[16]));
         configs.add(config2);
+
+        String[] array3 = getResources().getStringArray(R.array.email_163);
+        Configuration config3 = new Configuration();
+        config3.setCategoryId(3);
+        config3.setName(array3[0]);
+        config3.setReceiveProtocol(array3[1]);
+        config3.setReceiveHostKey(array3[2]);
+        config3.setReceiveHostValue(array3[3]);
+        config3.setReceivePortKey(array3[4]);
+        config3.setReceivePortValue(array3[5]);
+        config3.setReceiveEncryptKey(array3[6]);
+        config3.setReceiveEncryptValue("1".equals(array3[7]));
+        config3.setSendProtocol(array3[8]);
+        config3.setSendHostKey(array3[9]);
+        config3.setSendHostValue(array3[10]);
+        config3.setSendPortKey(array3[11]);
+        config3.setSendPortValue(array3[12]);
+        config3.setSendEncryptKey(array3[13]);
+        config3.setSendEncryptValue("1".equals(array3[14]));
+        config3.setAuthKey(array3[15]);
+        config3.setAuthValue("1".equals(array3[16]));
+        configs.add(config3);
+
         mPresenter.config(configs);
     }
 

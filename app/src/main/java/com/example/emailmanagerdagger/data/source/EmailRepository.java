@@ -95,8 +95,8 @@ public class EmailRepository implements EmailDataSource {
         mLocalDataSource.saveAll(data);
     }
 
-    public void deleteAll(CallBack callBack){
-        mLocalDataSource.deleteAll(callBack);
+    public void deleteAll(){
+        mLocalDataSource.deleteAll();
     }
 
     /**

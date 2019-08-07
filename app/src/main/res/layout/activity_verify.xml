@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:padding="8dp"
-            android:text="如何获取密码"
+            android:text="如何获取授权码"
             android:textColor="@color/colorPrimary" />
 
         <Button

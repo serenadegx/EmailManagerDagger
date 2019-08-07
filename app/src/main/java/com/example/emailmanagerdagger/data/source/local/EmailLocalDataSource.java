@@ -110,18 +110,12 @@ public class EmailLocalDataSource implements EmailDataSource {
         mAppExecutors.getDiskIO().execute(runnable);
     }
 
-    public void deleteAll(final CallBack callBack) {
+    public void deleteAll() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 mEmailDao.deleteAll();
                 mAttachmentDao.deleteAll();
-                mAppExecutors.getMainThread().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        callBack.onSuccess();
-                    }
-                });
             }
         };
         mAppExecutors.getDiskIO().execute(runnable);

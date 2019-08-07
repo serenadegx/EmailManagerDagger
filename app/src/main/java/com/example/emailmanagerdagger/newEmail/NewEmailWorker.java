@@ -24,10 +24,14 @@ import com.example.emailmanagerdagger.data.EmailParams;
 import com.example.emailmanagerdagger.data.source.EmailRepository;
 import com.example.emailmanagerdagger.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanagerdagger.emails.MainActivity;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -77,7 +81,20 @@ public class NewEmailWorker extends Worker {
         try {
             store = session.getStore(account.getConfig().getReceiveProtocol());
             store.connect();
-            Folder folder = store.getFolder("INBOX");
+            IMAPFolder folder = (IMAPFolder) store.getFolder("INBOX");
+            if (account.getConfigId() == 3) {
+                final Map<String, String> clientParams = new HashMap<String, String>();
+                clientParams.put("name", "my-imap");
+                clientParams.put("version", "1.0");
+                folder.doOptionalCommand("ID not supported",
+                        new IMAPFolder.ProtocolCommand() {
+                            @Override
+                            public Object doCommand(IMAPProtocol p)
+                                    throws ProtocolException {
+                                return p.id(clientParams);
+                            }
+                        });
+            }
             folder.open(Folder.READ_WRITE);
             folder.addMessageCountListener(new MessageCountAdapter() {
                 @Override

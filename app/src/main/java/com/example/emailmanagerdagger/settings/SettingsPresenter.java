@@ -180,23 +180,11 @@ public class SettingsPresenter implements SettingsContract.Presenter {
         mRepository.setCurAccount(account, new AccountDataSource.CallBack() {
             @Override
             public void onSuccess() {
-                mEmailRepository.deleteAll(new EmailDataSource.CallBack() {
-                    @Override
-                    public void onSuccess() {
-                        if (advancedView != null && !advancedView.isActive()) {
-                            return;
-                        }
-                        advancedView.setCurSuccess(account);
-                    }
-
-                    @Override
-                    public void onError() {
-                        if (advancedView != null && !advancedView.isActive()) {
-                            return;
-                        }
-                        advancedView.handleError("删除失败");
-                    }
-                });
+                if (advancedView != null && !advancedView.isActive()) {
+                    return;
+                }
+                mEmailRepository.deleteAll();
+                advancedView.setCurSuccess(account);
 
             }
 
