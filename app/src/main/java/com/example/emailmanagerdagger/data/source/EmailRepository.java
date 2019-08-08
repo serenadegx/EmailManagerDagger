@@ -45,6 +45,25 @@ public class EmailRepository implements EmailDataSource {
         }
     }
 
+    public void getEmails(final Account account, final EmailParams params, final int page, final int pageSize, final GetEmailsCallBack callBack) {
+        if (isCache) {
+            mLocalDataSource.getEmails(account, params, page, pageSize, new GetEmailsCallBack() {
+                @Override
+                public void onEmailsLoaded(List<Email> emails) {
+                    callBack.onEmailsLoaded(emails);
+                }
+
+                @Override
+                public void onDataNotAvailable() {
+                    //读取不到本地仓库，再去远程仓库拿，所谓的二级缓存
+                    getEmailsFromRemoteDataSource(account, params, page, pageSize, callBack);
+                }
+            });
+        } else {
+            getEmailsFromRemoteDataSource(account, params, page, pageSize, callBack);
+        }
+    }
+
     @Override
     public void getEmail(final Account account, final EmailParams params, final GetEmailCallBack callBack) {
         mLocalDataSource.getEmail(account, params, new GetEmailCallBack() {
@@ -91,11 +110,11 @@ public class EmailRepository implements EmailDataSource {
         mRemoteDataSource.save2Drafts(account, data, callBack);
     }
 
-    public void addEmails(List<Email> data){
+    public void addEmails(List<Email> data) {
         mLocalDataSource.saveAll(data);
     }
 
-    public void deleteAll(){
+    public void deleteAll() {
         mLocalDataSource.deleteAll();
     }
 
@@ -116,6 +135,21 @@ public class EmailRepository implements EmailDataSource {
             public void onEmailsLoaded(List<Email> emails) {
                 refreshLocalDataSource(params, emails);
                 callBack.onEmailsLoaded(emails);
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                callBack.onDataNotAvailable();
+            }
+        });
+    }
+
+    private void getEmailsFromRemoteDataSource(final Account account, final EmailParams params, final int page, final int pageSize, final GetEmailsCallBack callBack) {
+        mRemoteDataSource.getEmails(account, params, new GetEmailsCallBack() {
+            @Override
+            public void onEmailsLoaded(List<Email> emails) {
+                refreshLocalDataSource(params, emails);
+                mLocalDataSource.getEmails(account, params, page, pageSize, callBack);
             }
 
             @Override

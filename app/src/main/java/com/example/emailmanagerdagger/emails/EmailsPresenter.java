@@ -17,6 +17,8 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     private EmailsContract.View mView;
     private EmailParams params;
     private Account mAccount;
+    private int mPage = 0;
+    private int mPageSize = 10;
 
     @Inject
     public EmailsPresenter(EmailRepository mEmailRepository) {
@@ -27,8 +29,14 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     @Override
     public void loadInbox(Account data) {
         this.mAccount = data;
+        mPage = 0;
         params.setCategory(EmailParams.Category.INBOX);
-        mEmailRepository.getEmails(data, params, this);
+        mEmailRepository.getEmails(data, params, mPage, mPageSize, this);
+    }
+
+    public void loadInboxMore() {
+        params.setCategory(EmailParams.Category.INBOX);
+        mEmailRepository.getEmails(mAccount, params, mPage, mPageSize, this);
     }
 
     @Override
@@ -47,8 +55,9 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
 
     @Override
     public void refresh() {
+        mPage = 0;
         mEmailRepository.refresh();
-        mEmailRepository.getEmails(mAccount, params, this);
+        mEmailRepository.getEmails(mAccount, params, mPage, mPageSize, this);
     }
 
     @Override
@@ -74,15 +83,35 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
             return;
         }
         if (emails.isEmpty()) {
-            mView.showNoEmail();
+            if (mPage == 0) {
+                mView.showNoEmail();
+            } else {
+                mView.loadMoreEnd(emails);
+            }
+
+        } else if (emails.size() < mPageSize) {
+            mView.loadMoreEnd(emails);
         } else {
-            mView.showEmail(emails);
+            if (mPage == 0) {
+                mView.showEmail(emails);
+            } else {
+                mView.showNextPageEmail(emails);
+            }
         }
+        mPage++;
     }
 
     @Override
     public void onDataNotAvailable() {
-        mView.showLoadingEmailError("网络错误");
+        if (mView == null || !mView.isActive()) {
+            return;
+        }
+        if (mPage > 0) {
+            mPage--;
+            mView.showLoadMoreError();
+        } else {
+            mView.showLoadingEmailError("网络错误");
+        }
     }
 
     @Override

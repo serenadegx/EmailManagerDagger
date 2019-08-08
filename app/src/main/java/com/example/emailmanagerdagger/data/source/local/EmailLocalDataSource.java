@@ -15,6 +15,7 @@ import com.example.emailmanagerdagger.utils.AppExecutors;
 import org.greenrobot.greendao.query.QueryBuilder;
 import org.greenrobot.greendao.query.WhereCondition;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -49,6 +50,28 @@ public class EmailLocalDataSource implements EmailDataSource {
                         } else {
                             callBack.onEmailsLoaded(emails);
                         }
+                    }
+                });
+            }
+        };
+        mAppExecutors.getDiskIO().execute(runnable);
+    }
+
+    public void getEmails(Account account, final EmailParams params, final int page, final int pageSize, final GetEmailsCallBack callBack) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (page > 0)
+                    SystemClock.sleep(1000);
+                final List<Email> emails = mEmailDao.queryBuilder().where(EmailDao.Properties.Category
+                        .eq(params.getCategory()))
+                        .offset(page * pageSize)
+                        .limit(pageSize)
+                        .list();
+                mAppExecutors.getMainThread().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callBack.onEmailsLoaded(emails);
                     }
                 });
             }
@@ -135,6 +158,7 @@ public class EmailLocalDataSource implements EmailDataSource {
         mAppExecutors.getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
+                Collections.sort(emails);
                 for (int i = 0; i < emails.size(); i++) {
                     Email email = emails.get(i);
                     long id = mEmailDao.insert(email);

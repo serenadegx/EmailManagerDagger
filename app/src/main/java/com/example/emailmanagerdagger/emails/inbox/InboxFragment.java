@@ -21,6 +21,7 @@ import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
+import com.example.emailmanagerdagger.utils.EasyListAdapter;
 import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -33,21 +34,22 @@ import javax.inject.Inject;
 import dagger.android.support.DaggerFragment;
 
 @ActivityScoped
-public class InboxFragment extends DaggerFragment implements EmailsContract.View, SwipeRefreshLayout.OnRefreshListener {
+public class InboxFragment extends DaggerFragment implements EmailsContract.View, SwipeRefreshLayout.OnRefreshListener, EasyListAdapter.LoadMoreListener {
 
     @Inject
     EmailsPresenter mPresenter;
     private RecyclerView rv;
     private LinearLayout mEmptyView;
     private SwipeRefreshLayout srl;
-    private InboxListAdapter listAdapter;
+//    private InboxListAdapter listAdapter;
 
-    InboxListAdapter.ItemListener mItemListener = new InboxListAdapter.ItemListener() {
-        @Override
-        public void onEmailItemClick(Email data) {
-            mPresenter.jumpEmailDetail(data);
-        }
-    };
+    private InboxEasyListAdapter listAdapter;
+//    InboxListAdapter.ItemListener mItemListener = new InboxListAdapter.ItemListener() {
+//        @Override
+//        public void onEmailItemClick(Email data) {
+//            mPresenter.jumpEmailDetail(data);
+//        }
+//    };
 
     @Inject
     public InboxFragment() {
@@ -82,26 +84,58 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     }
 
     @Override
+    public void onRefresh() {
+        listAdapter.setEnable(false);
+        mPresenter.refresh();
+    }
+
+    @Override
+    public void onLoadMoreListener() {
+        srl.setEnabled(false);
+        mPresenter.loadInboxMore();
+    }
+
+    @Override
     public boolean isActive() {
         return isAdded();
     }
 
     @Override
     public void showEmail(List<Email> data) {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
-        Collections.sort(data);
         listAdapter.setNewData(data);
         mEmptyView.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void showNoEmail() {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         mEmptyView.setVisibility(View.VISIBLE);
     }
 
     @Override
+    public void showNextPageEmail(List<Email> emails) {
+        srl.setEnabled(true);
+        listAdapter.addData(emails);
+    }
+
+    @Override
+    public void loadMoreEnd(List<Email> emails) {
+        srl.setEnabled(true);
+        listAdapter.loadEnd(emails);
+    }
+
+    @Override
+    public void showLoadMoreError() {
+        srl.setEnabled(true);
+        listAdapter.loadMoreFailure();
+    }
+
+    @Override
     public void showLoadingEmailError(String msg) {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
     }
@@ -112,18 +146,20 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     }
 
     @Override
-    public void onRefresh() {
-        mPresenter.refresh();
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         mPresenter.dropView();
     }
 
     private void setupListAdapter() {
-        listAdapter = new InboxListAdapter(mItemListener, new ArrayList<Email>(0));
+        listAdapter = new InboxEasyListAdapter(new ArrayList<Email>(0), rv, this);
+//        listAdapter = new InboxListAdapter(mItemListener, new ArrayList<Email>(0));
         rv.setAdapter(listAdapter);
+        listAdapter.setItemClickListener(new EasyListAdapter.ItemClickListener<Email>() {
+            @Override
+            public void onItemClickListener(View view, int position, Email item) {
+                mPresenter.jumpEmailDetail(item);
+            }
+        });
     }
 }

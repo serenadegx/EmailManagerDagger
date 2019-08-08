@@ -101,6 +101,11 @@ public class SentFragment extends DaggerFragment implements EmailsContract.View,
     }
 
     @Override
+    public void loadMoreEnd(List<Email> emails) {
+
+    }
+
+    @Override
     public void showLoadingEmailError(String msg) {
         srl.setRefreshing(false);
         Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
@@ -109,6 +114,16 @@ public class SentFragment extends DaggerFragment implements EmailsContract.View,
     @Override
     public void showEmailDetailUi(EmailParams params) {
         EmailDetailActivity.start2EmailDetailActivity(getContext(), params);
+    }
+
+    @Override
+    public void showNextPageEmail(List<Email> emails) {
+
+    }
+
+    @Override
+    public void showLoadMoreError() {
+
     }
 
     @Override

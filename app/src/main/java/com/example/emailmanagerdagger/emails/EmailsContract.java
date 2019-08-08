@@ -16,10 +16,15 @@ public interface EmailsContract {
 
         void showNoEmail();
 
+        void loadMoreEnd(List<Email> emails);
+
         void showLoadingEmailError(String msg);
 
         void showEmailDetailUi(EmailParams params);
 
+        void showNextPageEmail(List<Email> emails);
+
+        void showLoadMoreError();
     }
 
     interface Presenter extends BasePresenter<View> {
