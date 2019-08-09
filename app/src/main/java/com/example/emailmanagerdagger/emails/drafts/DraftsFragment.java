@@ -22,6 +22,7 @@ import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
 import com.example.emailmanagerdagger.send.SendEmailActivity;
+import com.example.emailmanagerdagger.utils.EasyListAdapter;
 import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -34,7 +35,7 @@ import javax.inject.Inject;
 import dagger.android.support.DaggerFragment;
 
 @ActivityScoped
-public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout.OnRefreshListener, EmailsContract.View {
+public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout.OnRefreshListener, EmailsContract.View, EasyListAdapter.LoadMoreListener {
 
     @Inject
     EmailsPresenter mPresenter;
@@ -47,7 +48,8 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
             mPresenter.jumpEmailDetail(data);
         }
     };
-    private DraftsListAdapter listAdapter;
+    private DraftEasyListAdapter listAdapter;
+    //    private DraftsListAdapter listAdapter;
 
     @Inject
     public DraftsFragment() {
@@ -82,7 +84,14 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
 
     @Override
     public void onRefresh() {
+        listAdapter.setEnable(false);
         mPresenter.refresh();
+    }
+
+    @Override
+    public void onLoadMoreListener() {
+        srl.setEnabled(false);
+        mPresenter.loadDraftsMore();
     }
 
     @Override
@@ -92,7 +101,7 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
 
     @Override
     public void showEmail(List<Email> data) {
-        Collections.sort(data);
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         mEmptyView.setVisibility(View.INVISIBLE);
         listAdapter.setNewData(data);
@@ -101,17 +110,20 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
 
     @Override
     public void showNoEmail() {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         mEmptyView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void loadMoreEnd(List<Email> emails) {
-
+        srl.setEnabled(true);
+        listAdapter.loadEnd(emails);
     }
 
     @Override
     public void showLoadingEmailError(String msg) {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
     }
@@ -123,12 +135,14 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
 
     @Override
     public void showNextPageEmail(List<Email> emails) {
-
+        srl.setEnabled(true);
+        listAdapter.addData(emails);
     }
 
     @Override
     public void showLoadMoreError() {
-
+        srl.setEnabled(true);
+        listAdapter.loadMoreFailure();
     }
 
     @Override
@@ -138,7 +152,14 @@ public class DraftsFragment extends DaggerFragment implements SwipeRefreshLayout
     }
 
     private void setupListAdapter() {
-        listAdapter = new DraftsListAdapter(mItemListener, new ArrayList<Email>(0));
+        listAdapter = new DraftEasyListAdapter(new ArrayList<Email>(0), rv, this);
+//        listAdapter = new DraftsListAdapter(mItemListener, new ArrayList<Email>(0));
         rv.setAdapter(listAdapter);
+        listAdapter.setItemClickListener(new EasyListAdapter.ItemClickListener<Email>() {
+            @Override
+            public void onItemClickListener(View view, int position, Email item) {
+                mPresenter.jumpEmailDetail(item);
+            }
+        });
     }
 }

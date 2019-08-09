@@ -78,6 +78,7 @@ public class InboxFragment extends DaggerFragment implements EmailsContract.View
     @Override
     public void onStart() {
         super.onStart();
+        listAdapter.setEnable(false);
         srl.setRefreshing(true);
         mPresenter.takeView(this);
         mPresenter.loadInbox(EmailApplication.getAccount());

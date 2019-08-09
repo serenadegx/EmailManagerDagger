@@ -22,6 +22,7 @@ import com.example.emailmanagerdagger.di.ActivityScoped;
 import com.example.emailmanagerdagger.emaildetail.EmailDetailActivity;
 import com.example.emailmanagerdagger.emails.EmailsContract;
 import com.example.emailmanagerdagger.emails.EmailsPresenter;
+import com.example.emailmanagerdagger.utils.EasyListAdapter;
 import com.example.multifile.ui.EMDecoration;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -34,21 +35,22 @@ import javax.inject.Inject;
 import dagger.android.support.DaggerFragment;
 
 @ActivityScoped
-public class SentFragment extends DaggerFragment implements EmailsContract.View, SwipeRefreshLayout.OnRefreshListener {
+public class SentFragment extends DaggerFragment implements EmailsContract.View, SwipeRefreshLayout.OnRefreshListener, EasyListAdapter.LoadMoreListener {
 
     @Inject
     EmailsPresenter mPresenter;
     private SwipeRefreshLayout srl;
     private RecyclerView rv;
     private LinearLayout mEmptyView;
-    private SentListAdapter listAdapter;
+//    private SentListAdapter listAdapter;
 
-    SentListAdapter.ItemListener mItemListener = new SentListAdapter.ItemListener() {
-        @Override
-        public void onEmailItemClick(Email data) {
-            mPresenter.jumpEmailDetail(data);
-        }
-    };
+//    SentListAdapter.ItemListener mItemListener = new SentListAdapter.ItemListener() {
+//        @Override
+//        public void onEmailItemClick(Email data) {
+//            mPresenter.jumpEmailDetail(data);
+//        }
+//    };
+    private SentEasyListAdapter listAdapter;
 
     @Inject
     public SentFragment() {
@@ -82,31 +84,46 @@ public class SentFragment extends DaggerFragment implements EmailsContract.View,
     }
 
     @Override
-    public boolean isActive() {
-        return isAdded();
+    public void onRefresh() {
+        listAdapter.setEnable(false);
+        mPresenter.refresh();
+    }
+
+    @Override
+    public void onLoadMoreListener() {
+        srl.setEnabled(false);
+        mPresenter.loadSentMore();
     }
 
     @Override
     public void showEmail(List<Email> data) {
-        Collections.sort(data);
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         mEmptyView.setVisibility(View.INVISIBLE);
         listAdapter.setNewData(data);
     }
 
     @Override
+    public boolean isActive() {
+        return isAdded();
+    }
+
+    @Override
     public void showNoEmail() {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         mEmptyView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void loadMoreEnd(List<Email> emails) {
-
+        srl.setEnabled(true);
+        listAdapter.loadEnd(emails);
     }
 
     @Override
     public void showLoadingEmailError(String msg) {
+        listAdapter.setEnable(true);
         srl.setRefreshing(false);
         Snackbar.make(getView(), msg, Snackbar.LENGTH_SHORT).show();
     }
@@ -118,17 +135,14 @@ public class SentFragment extends DaggerFragment implements EmailsContract.View,
 
     @Override
     public void showNextPageEmail(List<Email> emails) {
-
+        srl.setEnabled(true);
+        listAdapter.addData(emails);
     }
 
     @Override
     public void showLoadMoreError() {
-
-    }
-
-    @Override
-    public void onRefresh() {
-        mPresenter.refresh();
+        srl.setEnabled(true);
+        listAdapter.loadMoreFailure();
     }
 
     @Override
@@ -138,7 +152,14 @@ public class SentFragment extends DaggerFragment implements EmailsContract.View,
     }
 
     private void setupListAdapter() {
-        listAdapter = new SentListAdapter(mItemListener, new ArrayList<Email>(0));
+        listAdapter = new SentEasyListAdapter(new ArrayList<Email>(0),rv,this);
+//        listAdapter = new SentListAdapter(mItemListener, new ArrayList<Email>(0));
         rv.setAdapter(listAdapter);
+        listAdapter.setItemClickListener(new EasyListAdapter.ItemClickListener<Email>() {
+            @Override
+            public void onItemClickListener(View view, int position, Email item) {
+                mPresenter.jumpEmailDetail(item);
+            }
+        });
     }
 }

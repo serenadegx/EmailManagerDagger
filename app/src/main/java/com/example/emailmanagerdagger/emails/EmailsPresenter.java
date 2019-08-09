@@ -42,6 +42,12 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     @Override
     public void loadSent(Account data) {
         this.mAccount = data;
+        mPage = 0;
+        params.setCategory(EmailParams.Category.SENT);
+        mEmailRepository.getEmails(mAccount, params, this);
+    }
+
+    public void loadSentMore() {
         params.setCategory(EmailParams.Category.SENT);
         mEmailRepository.getEmails(mAccount, params, this);
     }
@@ -49,6 +55,12 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
     @Override
     public void loadDrafts(Account data) {
         this.mAccount = data;
+        mPage = 0;
+        params.setCategory(EmailParams.Category.DRAFTS);
+        mEmailRepository.getEmails(mAccount, params, this);
+    }
+
+    public void loadDraftsMore() {
         params.setCategory(EmailParams.Category.DRAFTS);
         mEmailRepository.getEmails(mAccount, params, this);
     }
@@ -90,7 +102,11 @@ public class EmailsPresenter implements EmailsContract.Presenter, EmailDataSourc
             }
 
         } else if (emails.size() < mPageSize) {
-            mView.loadMoreEnd(emails);
+            if (mPage == 0) {
+                mView.showEmail(emails);
+            } else {
+                mView.loadMoreEnd(emails);
+            }
         } else {
             if (mPage == 0) {
                 mView.showEmail(emails);
